@@ -1,0 +1,2 @@
+const  √ = sqrt
+const  ∑ = sum
