@@ -8,8 +8,8 @@ function moments(entity::FundamentalMatrix, matches...)
     𝐀 = fill(0.0,(9,9))
     for correspondence in zip(pts1, pts2)
         m , mʹ = correspondence
-        𝐦  = 𝑛(collect(m.coords))
-        𝐦ʹ = 𝑛(collect(mʹ.coords))
+        𝐦  = 𝑛(collect(Float64,m.coords))
+        𝐦ʹ = 𝑛(collect(Float64,mʹ.coords))
         𝐀 = 𝐀 + (𝐦*𝐦') ⊗ (𝐦ʹ*𝐦ʹ')
     end
     𝐀/N

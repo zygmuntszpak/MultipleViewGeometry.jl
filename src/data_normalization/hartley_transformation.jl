@@ -56,7 +56,7 @@ function hartley_transformation(pts::AbstractArray{T}) where T<:HomogeneousPoint
 
 end
 
-function _hartley_transformation(𝐌::AbstractArray{T}) where T<:Number
+function _hartley_transformation(𝐌::AbstractArray{T,2})::Matrix{T} where T<:Number
     if isempty(𝐌)
         throw(ArgumentError("Array cannot be empty."))
     end
@@ -65,8 +65,8 @@ function _hartley_transformation(𝐌::AbstractArray{T}) where T<:Number
     # Compute root mean square distance of each point to the centroid.
     σ = √((1/length(𝐌)) * ∑((𝐌 .- 𝐜).^2))
     σ⁻¹ = 1./σ
-    𝐓 = [σ⁻¹*eye(ndim) -σ⁻¹*transpose(𝐜);
-         zeros(1,ndim)                1]
+    𝐓::Matrix{T} = [σ⁻¹*eye(ndim) -σ⁻¹*transpose(𝐜);
+                    zeros(1,ndim)                1]
 
 end
 
@@ -116,10 +116,16 @@ the origin of the coordinate system is equal to ``\\sqrt{d}``.
 
 """
 function hartley_normalization(pts::AbstractArray{T}) where T<:HomogeneousPoint
+    𝐓  = hartley_transformation(pts)
+    hartley_normalization!(copy(pts))
+end
+
+function hartley_normalization!(pts::AbstractArray{T}) where T<:HomogeneousPoint
     𝐓 = hartley_transformation(pts)
     map!(pts , pts) do p
         𝐦 = collect(p.coords)
         𝐦 = 𝑛(𝐓 * 𝐦)
         HomogeneousPoint(tuple(𝐦...))
     end
+    (pts,𝐓)
 end

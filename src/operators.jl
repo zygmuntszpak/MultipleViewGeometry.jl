@@ -35,3 +35,8 @@ function 𝑛(v::Vector{T}) where T<:Real
         v
     end
 end
+
+function smallest_eigenpair(A::AbstractArray{T,2} where T <:Real)
+    F = eigfact(A)::Base.LinAlg.Eigen{Float64,Float64,Array{Float64,2},Array{Float64,1}};
+    (F[:values][end], F[:vectors][:,end])
+end
