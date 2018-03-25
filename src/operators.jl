@@ -36,7 +36,16 @@ function 𝑛(v::Vector{T}) where T<:Real
     end
 end
 
-function smallest_eigenpair(A::AbstractArray{T,2} where T <:Real)
+function smallest_eigenpair(A::AbstractArray{T,2}) where T <:Real
     F = eigfact(A)::Base.LinAlg.Eigen{Float64,Float64,Array{Float64,2},Array{Float64,1}};
-    (F[:values][end], F[:vectors][:,end])
+    (F[:values][1], F[:vectors][:,1])
+end
+
+function vec2antisym(v::AbstractVector{T})  where T<:Real
+    if length(v) != 3
+         throw(ArgumentError("The operation is only defined for a length-3 vector."))
+    end
+    𝐒::Matrix{T} = [  0  -v[3]    v[2] ;
+                    v[3]    0    -v[1] ;
+                   -v[2]  v[1]      0]
 end
