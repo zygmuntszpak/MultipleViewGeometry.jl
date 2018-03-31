@@ -6,3 +6,8 @@ v = [2,2,2]
 # Vectors which represent points at infinity are unchanged.
 v = [2,2,0]
 @test 𝑛(v) == [2,2,0]
+
+v = [1, 2, 3]
+@test vec2antisym(v) == [ 0 -3  2;
+                          3  0 -1;
+                         -2  1  0]
