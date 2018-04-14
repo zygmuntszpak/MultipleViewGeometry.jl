@@ -1,21 +1,30 @@
 __precompile__()
-
 module MultipleViewGeometry
 
 using Compat
 
-include("types.jl")
-include("math_aliases.jl")
+
 
 # Types exported from `types.jl`
 export HomogeneousPoint, ProjectiveEntity, FundamentalMatrix, ProjectionMatrix
 export CameraModel, Pinhole, CanonicalLens
+export EstimationAlgorithm, DirectLinearTransform, Taubin, FundamentalNumericalScheme
+export CostFunction, ApproximateMaximumLikelihood, AML
+export HomogeneousCoordinates
+export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
+export CovarianceMatrices
+
+# Aliases exported from math_aliases.jl
+export ⊗, ∑, √
 
 # Functions exported from `operators.jl`.
 export 𝑛, smallest_eigenpair,vec2antisym
 
 # Functions exported from `hartley_transformation.jl`.
 export hartley_normalization, hartley_transformation
+
+# Functions exported from `transform.jl`.
+export transform
 
 # Functions exported from `moments_fundamentalmatrix.jl`
 export moments
@@ -35,14 +44,36 @@ export project
 # Functions exported from `rotations.jl`
 export rotx, roty, rotz, rotxyz, rodrigues2matrix
 
-include("operators.jl")
-include("rotation/rotations.jl")
-include("data_normalization/hartley_transformation.jl")
-include("camera/construct_projectionmatrix.jl")
-include("projection/project.jl")
-include("twoview_estimation/moments_fundamentalmatrix.jl")
-include("twoview_estimation/estimate_twoview.jl")
-include("twoview_estimation/construct_fundamentalmatrix.jl")
+# Functions exported from `cost_functions.jl`
+export cost, X
+
+include("math_aliases/ModuleMathAliases.jl")
+include("types/ModuleTypes.jl")
+include("operators/ModuleOperators.jl")
+include("rotation/ModuleRotation.jl")
+include("data_normalization/ModuleDataNormalization.jl")
+include("transform/ModuleTransform.jl")
+include("projection/ModuleProjection.jl")
+include("carriers/ModuleCarriers.jl")
+include("moments/ModuleMoments.jl")
+include("cost_function/ModuleCostFunction.jl")
+include("estimate/ModuleEstimation.jl")
+include("construct/ModuleConstruct.jl")
+
+
+using .ModuleMathAliases
+using .ModuleTypes
+using .ModuleOperators
+using .ModuleRotation
+using .ModuleDataNormalization
+using .ModuleTransform
+using .ModuleProjection
+using .ModuleCarriers
+using .ModuleEstimation
+using .ModuleMoments
+using .ModuleCostFunction
+using .ModuleConstruct
+
 
 # package code goes here
 

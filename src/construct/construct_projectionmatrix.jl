@@ -11,3 +11,8 @@ function construct( e::ProjectionMatrix,
     end
     𝐏 = 𝐊*[𝐑 -𝐑*𝐭]
 end
+
+function construct( e::ProjectionMatrix, 𝐅::AbstractArray{T,2}) where T<:Real
+    𝐞 = collect(epipole(𝐅').coords)
+    eye(3,4), [vec2antisym(𝐞) * 𝐅  𝐞]
+end

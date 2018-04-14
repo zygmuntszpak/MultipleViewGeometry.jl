@@ -25,7 +25,7 @@ using MultipleViewGeometry, Base.Test
 ℳʹ = project(Pinhole(),𝐏₂,𝒳)
 
 # Estimate of the fundamental matrix and the true fundamental matrix.
-𝐅 = estimate(FundamentalMatrix(), ℳ, ℳʹ)
+𝐅 = estimate(FundamentalMatrix(), DirectLinearTransform(), ℳ, ℳʹ)
 𝐅ₜ = construct(FundamentalMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂)
 
 # Ensure the estimated and true matrix have the same scale and sign.
@@ -47,3 +47,46 @@ for correspondence in zip(1:length(ℳ),ℳ, ℳʹ)
 end
 
 @test isapprox(sum(residual), 0.0; atol = 1e-9)
+
+# Test the Fundamental Numerical Scheme on the Fundamental matrix problem.
+𝐅₀ = estimate(FundamentalMatrix(),DirectLinearTransform(), ℳ, ℳʹ)
+𝐅 = estimate(FundamentalMatrix(),
+                        FundamentalNumericalScheme(reshape(𝐅₀,9,1), 5, 1e-10),
+                        [eye(4) for i = 1:length(ℳ)], ℳ, ℳʹ)
+
+𝐅ₜ = construct(FundamentalMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂)
+# Ensure the estimated and true matrix have the same scale and sign.
+𝐅 = 𝐅 / norm(𝐅)
+𝐅 = 𝐅 / sign(𝐅[1,2])
+𝐅ₜ = 𝐅ₜ / norm(𝐅ₜ)
+𝐅ₜ = 𝐅ₜ / sign(𝐅ₜ[1,2])
+
+@test 𝐅 ≈ 𝐅ₜ
+
+# The way the Taubin estimate is implemented is numerically unstable
+# for noiseless data.
+
+# # Estimate of the fundamental matrix and the true fundamental matrix.
+# 𝐅 = estimate(FundamentalMatrix(),Taubin(), ℳ, ℳʹ)
+# 𝐅ₜ = construct(FundamentalMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂)
+#
+# # Ensure the estimated and true matrix have the same scale and sign.
+# 𝐅 = 𝐅 / norm(𝐅)
+# 𝐅 = 𝐅 / sign(𝐅[1,2])
+# 𝐅ₜ = 𝐅ₜ / norm(𝐅ₜ)
+# 𝐅ₜ = 𝐅ₜ / sign(𝐅ₜ[1,2])
+#
+# @test 𝐅 ≈ 𝐅ₜ
+
+
+# m = ℳ[1]
+# mʹ = ℳʹ[1]
+# 𝐦  = 𝑛(collect(Float64,m.coords))
+# 𝐦ʹ = 𝑛(collect(Float64,mʹ.coords))
+
+# 𝐞₁ = [1.0 0.0 0.0]'
+# 𝐞₂ = [0.0 1.0 0.0]'
+# (𝐦*𝐦') ⊗ (𝐦ʹ*𝐦ʹ')
+# z = [kron(𝐞₁, 𝐦ʹ)]
+# z = [(𝐞₁ ⊗ 𝐦ʹ) (𝐞₂ ⊗ 𝐦ʹ) (𝐦 ⊗ 𝐞₁) (𝐦 ⊗ 𝐞₂)]
+# ∂ₓ𝐮 = [(𝐞₁ ⊗ 𝐦ʹ) (𝐞₂ ⊗ 𝐦ʹ) (𝐦 ⊗ 𝐞₁) (𝐦 ⊗ 𝐞₂)]
