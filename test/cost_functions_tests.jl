@@ -49,6 +49,15 @@ Jₐₘₗ =  cost(AML(),FundamentalMatrix(), 𝐟 ,
 # The true parameters should lie in the null space of the matrix X.
 @test all(isapprox.(𝐗 * 𝐟, 0.0; atol = 1e-10))
 
+# Verify that the the vectorised fundamental matrix is in the null space of H.
+# H represents the Hessian matrix of the AML cost function. 
+𝐇 = H(AML(),FundamentalMatrix(), reshape(𝐅,9,1),
+                                         [eye(4) for i = 1:length(ℳ)], ℳ, ℳʹ)
+
+# The true parameters should lie in the null space of the matrix H.
+@test all(isapprox.(𝐇 * 𝐟, 0.0; atol = 1e-10))
+
+
 # matches = ℳ, ℳʹ
 # Λ = [eye(4) for i = 1:length(ℳ)]
 # zip(matches, Λ)
