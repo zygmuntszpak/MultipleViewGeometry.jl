@@ -1,6 +1,8 @@
 module ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes, MultipleViewGeometry.ModuleOperators, MultipleViewGeometry.ModuleMathAliases
 using MultipleViewGeometry.ModuleCarriers
-export cost, X, H
+using MultipleViewGeometry.ModuleTransform
+using StaticArrays
+export cost, X, H, covariance_matrix, covariance_matrix_debug, covariance_matrix_normalised
 include("cost_functions.jl")
 end
