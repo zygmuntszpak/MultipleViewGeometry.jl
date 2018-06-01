@@ -10,3 +10,4 @@ using Base.Test
 @testset "Projection Matrix Construction Tests" begin include("construct_projectionmatrix_tests.jl") end
 @testset "Rotations Tests" begin include("rotations_tests.jl") end
 @testset "Cost Function Tests" begin include("cost_functions_tests.jl") end
+@testset "Fundamental Matrix Covariance Test" begin include("fundamental_matrix_covariance_test.jl") end

@@ -43,31 +43,36 @@ equal to ``\\sqrt{d}``.
 
 
 """
-function hartley_transformation(pts::AbstractArray{T}) where T<:HomogeneousPoint
-    if isempty(pts)
+
+function hartley_transformation(ℳ::Vector{T})::SMatrix where T <:AbstractArray
+    if isempty(ℳ)
         throw(ArgumentError("Array cannot be empty."))
     end
-    # Convert list of homogeneous coordinates into an npts x ndim matrix.
-    npts = length(pts);
-    ndim = length(pts[1].coords);
-    array = reinterpret(Float64,pts,(npts,ndim))
-    𝐌 = transpose(reshape(array,(ndim,npts)))
-    _hartley_transformation(view(𝐌,:,1:ndim-1))
-
+    npts = length(ℳ)
+    ndim = length(ℳ[1])-1
+    𝐜 = centroid(ℳ)
+    σ = root_mean_square(ℳ, 𝐜)
+    σ⁻¹ = 1./σ
+    𝐓 = SMatrix{ndim+1,ndim+1,Float64, (ndim+1)^2}([σ⁻¹*eye(ndim) -σ⁻¹*𝐜[1:end-1] ; zeros(1,ndim) 1.0])
 end
 
-function _hartley_transformation(𝐌::AbstractArray{T,2})::Matrix{T} where T<:Number
-    if isempty(𝐌)
-        throw(ArgumentError("Array cannot be empty."))
+function centroid(positions::Vector{T}) where T <: AbstractArray
+    x = zeros(T)
+    for pos ∈ positions
+        x .= (+).(x, pos)
     end
-    𝐜 = mean(𝐌,1)
-    ndim = length(𝐜)
-    # Compute root mean square distance of each point to the centroid.
-    σ = √((1/length(𝐌)) * ∑((𝐌 .- 𝐜).^2))
-    σ⁻¹ = 1./σ
-    𝐓::Matrix{T} = [σ⁻¹*eye(ndim) -σ⁻¹*transpose(𝐜);
-                    zeros(1,ndim)                1]
+    x .= (/).(x,length(positions))
+    return x
+end
 
+function root_mean_square(ℳ::Vector{T}, 𝐜::T ) where  T <: AbstractArray
+    total = 0.0
+    npts = length(ℳ)
+    ndim = length(ℳ[1])-1
+    for 𝐦 ∈ ℳ
+         total  = total + ∑((𝐦-𝐜).^2)
+    end
+    σ = √( (1/(npts*ndim)) * total)
 end
 
 """
@@ -115,17 +120,14 @@ the origin of the coordinate system is equal to ``\\sqrt{d}``.
 
 
 """
-function hartley_normalization(pts::AbstractArray{T}) where T<:HomogeneousPoint
-    𝐓  = hartley_transformation(pts)
-    hartley_normalization!(copy(pts))
+function hartley_normalization(ℳ::Vector{<:AbstractArray})
+    𝒪, 𝐓 = hartley_normalization!(copy(ℳ))
 end
 
-function hartley_normalization!(pts::AbstractArray{T}) where T<:HomogeneousPoint
-    𝐓 = hartley_transformation(pts)
-    map!(pts , pts) do p
-        𝐦 = collect(p.coords)
-        𝐦 = 𝑛(𝐓 * 𝐦)
-        HomogeneousPoint(tuple(𝐦...))
+function hartley_normalization!(ℳ::Vector{<:AbstractArray})
+    𝐓 = hartley_transformation(ℳ)
+    map!(ℳ , ℳ) do 𝐦
+         𝐓 * 𝐦
     end
-    (pts,𝐓)
+     ℳ, 𝐓
 end

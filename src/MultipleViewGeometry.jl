@@ -2,6 +2,7 @@ __precompile__()
 module MultipleViewGeometry
 
 using Compat
+using StaticArrays
 
 
 
@@ -13,15 +14,17 @@ export CostFunction, ApproximateMaximumLikelihood, AML
 export HomogeneousCoordinates
 export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
 export CovarianceMatrices
+export Point2DH, Point3DH
+export HessianApproximation, CanonicalApproximation, CovarianceEstimationScheme
 
 # Aliases exported from math_aliases.jl
 export ⊗, ∑, √
 
 # Functions exported from `operators.jl`.
-export 𝑛, smallest_eigenpair,vec2antisym
+export 𝑛, ∂𝑛, smallest_eigenpair,vec2antisym
 
 # Functions exported from `hartley_transformation.jl`.
-export hartley_normalization, hartley_transformation
+export hartley_normalization, hartley_normalization!, hartley_transformation
 
 # Functions exported from `transform.jl`.
 export transform
@@ -45,7 +48,7 @@ export project
 export rotx, roty, rotz, rotxyz, rodrigues2matrix
 
 # Functions exported from `cost_functions.jl`
-export cost, X
+export cost, X, covariance_matrix, covariance_matrix_debug
 
 include("math_aliases/ModuleMathAliases.jl")
 include("types/ModuleTypes.jl")

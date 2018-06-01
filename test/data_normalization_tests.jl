@@ -1,16 +1,16 @@
 using MultipleViewGeometry, Base.Test
-
+using StaticArrays
 
 # Tests for a set of two-dimensional Cartesian points represented by homogeneous
 # coordinates.
-ℳ = map(HomogeneousPoint,
+ℳ = map(Point2DH,
         [(-10.0, -10.0, 1.0),
          (-10.0,  10.0, 1.0),
          ( 10.0, -10.0, 1.0),
          ( 10.0,  10.0, 1.0)])
 
 ℳʹ, 𝐓 = hartley_normalization(ℳ)
-@test ℳʹ == map(HomogeneousPoint,
+@test ℳʹ == map(Point2DH,
                                         [(-1.0,-1.0, 1.0),
                                          (-1.0, 1.0, 1.0),
                                          (1.0, -1.0, 1.0),
@@ -25,7 +25,7 @@ using MultipleViewGeometry, Base.Test
 
 # Tests for a set of three-dimensional Cartesian points represented by homogeneous
 # coordinates.
-ℳ = map(HomogeneousPoint,
+ℳ = map(Point3DH,
            [(-10.0, -10.0, -10.0, 1.0),
             (-10.0, -10.0,  10.0, 1.0),
             (-10.0,  10.0, -10.0, 1.0),
@@ -36,7 +36,7 @@ using MultipleViewGeometry, Base.Test
             ( 10.0,  10.0,  10.0, 1.0)])
 
 ℳʹ, 𝐓 = hartley_normalization(ℳ)
-@test ℳʹ == map(HomogeneousPoint,
+@test ℳʹ == map(Point3DH,
                                          [(-1.0,-1.0, -1.0, 1.0),
                                           (-1.0,-1.0,  1.0, 1.0),
                                           (-1.0, 1.0, -1.0, 1.0),

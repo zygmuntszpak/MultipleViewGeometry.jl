@@ -1,17 +1,9 @@
 using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry.ModuleTypes
 
-ℳ = map(HomogeneousPoint,
-        [(-10.0, -10.0, 1.0),
-         (-10.0,  10.0, 1.0),
-         ( 10.0, -10.0, 1.0),
-         ( 10.0,  10.0, 1.0)])
 
-ℳ = map(HomogeneousPoint,
-          [(-20.0, -20.0, 1.0),
-           (-20.0,  20.0, 1.0),
-           ( 20.0, -20.0, 1.0),
-           ( 20.0,  20.0, 1.0)])
+ℳ = [Point2DH(rand(1,3)) for i = 1:10000]
 
-moments(FundamentalMatrix(), (ℳ,ℳ)...)
+moments(FundamentalMatrix(), (ℳ,ℳ))
 
 # TODO

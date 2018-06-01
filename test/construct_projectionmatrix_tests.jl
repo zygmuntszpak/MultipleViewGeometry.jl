@@ -1,4 +1,5 @@
 using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry.ModuleTypes
 
 𝐊 = eye(3)
 𝐑 = eye(3)
@@ -20,6 +21,7 @@ using MultipleViewGeometry, Base.Test
 𝐏₁ = construct(ProjectionMatrix(),𝐊₁,𝐑₁,𝐭₁)
 𝐏₂ = construct(ProjectionMatrix(),𝐊₂,𝐑₂,𝐭₂)
 𝐅 = construct(FundamentalMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂)
+
 𝐎₁, 𝐎₂ = construct(ProjectionMatrix(),𝐅)
 𝐅₂ = construct(FundamentalMatrix(),𝐎₁, 𝐎₂)
 

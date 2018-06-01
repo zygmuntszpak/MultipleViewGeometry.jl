@@ -1,59 +1,63 @@
-function estimate(entity::FundamentalMatrix, method::DirectLinearTransform, matches...)
-    ℳ, ℳʹ = matches
+function estimate(entity::FundamentalMatrix, method::DirectLinearTransform, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
+    ℳ, ℳʹ =  collect(𝒟)
     N = length(ℳ)
     if (N != length(ℳʹ))
           throw(ArgumentError("There should be an equal number of points for each view."))
     end
-    (ℳ,𝐓) = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳ)
-    (ℳʹ,𝐓ʹ) = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳʹ)
-    𝐀::Matrix{Float64} = moments(FundamentalMatrix(), ℳ, ℳʹ)
-    (λ::Float64, f::Vector{Float64}) = smallest_eigenpair(𝐀)
-    𝐅::Matrix{Float64} = reshape(f,(3,3))
-    enforce_ranktwo!(𝐅)
+    𝒪, 𝐓 = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳ)
+    𝒪ʹ, 𝐓ʹ  = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳʹ)
+    𝐀 = moments(FundamentalMatrix(), (𝒪, 𝒪ʹ))
+    λ, f = smallest_eigenpair(Symmetric(𝐀))
+    𝐅 = reshape(f,(3,3))
+    𝐅 = enforce_ranktwo!(Array(𝐅))
+    𝐅 = 𝐅 / norm(𝐅)
     # Transform estimate back to the original (unnormalised) coordinate system.
-    𝐅 = 𝐓ʹ'*𝐅*𝐓
+    𝐓ʹ'*𝐅*𝐓
 end
 
 # TODO fix numerical instability
-function estimate(entity::FundamentalMatrix, method::Taubin, matches...)
-    ℳ, ℳʹ = matches
-    N = length(ℳ)
-    if (N != length(ℳʹ))
-          throw(ArgumentError("There should be an equal number of points for each view."))
-    end
-    (ℳ,𝐓) = hartley_normalization(ℳ)
-    (ℳʹ,𝐓ʹ) = hartley_normalization(ℳʹ)
-    𝐀::Matrix{Float64} = moments(FundamentalMatrix(), ℳ, ℳʹ)
-    𝐁::Matrix{Float64} = mean_covariance(FundamentalMatrix(), ℳ, ℳʹ)
-    (λ::Float64, f::Vector{Float64}) = smallest_eigenpair(𝐀,𝐁)
-    𝐅::Matrix{Float64} = reshape(f,(3,3))
-    enforce_ranktwo!(𝐅)
-    # Transform estimate back to the original (unnormalised) coordinate system.
-    𝐅 = 𝐓ʹ'*𝐅*𝐓
-end
+# function estimate(entity::FundamentalMatrix, method::Taubin, matches...)
+#     ℳ, ℳʹ = matches
+#     N = length(ℳ)
+#     if (N != length(ℳʹ))
+#           throw(ArgumentError("There should be an equal number of points for each view."))
+#     end
+#     (ℳ,𝐓) = hartley_normalization(ℳ)
+#     (ℳʹ,𝐓ʹ) = hartley_normalization(ℳʹ)
+#     𝐀::Matrix{Float64} = moments(FundamentalMatrix(), ℳ, ℳʹ)
+#     𝐁::Matrix{Float64} = mean_covariance(FundamentalMatrix(), ℳ, ℳʹ)
+#     (λ::Float64, f::Vector{Float64}) = smallest_eigenpair(𝐀,𝐁)
+#     𝐅::Matrix{Float64} = reshape(f,(3,3))
+#     enforce_ranktwo!(𝐅)
+#     # Transform estimate back to the original (unnormalised) coordinate system.
+#     𝐅 = 𝐓ʹ'*𝐅*𝐓
+# end
 
-function estimate(entity::FundamentalMatrix, method::FundamentalNumericalScheme, Λ::Vector{T1},  matches...) where T1 <: Matrix
-    ℳ, ℳʹ = matches
+function estimate(entity::FundamentalMatrix, method::FundamentalNumericalScheme,  𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
+    ℳ, ℳʹ = 𝒟
+    Λ₀, Λ₀ʹ = 𝒞
     N = length(ℳ)
     if (N != length(ℳʹ))
           throw(ArgumentError("There should be an equal number of points for each view."))
     end
-    if (N != length(Λ))
+    if (N != length(Λ₀) || N != length(Λ₀ʹ) )
           throw(ArgumentError("There should be a covariance matrix for each point correspondence."))
     end
-    (ℳ,𝐓) = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳ)
-    (ℳʹ,𝐓ʹ) = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳʹ)
+    # Map corresponding points to the normalized coordinate system.
+    𝒪, 𝐓 = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳ)
+    𝒪ʹ, 𝐓ʹ = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳʹ)
     # Map seed to the normalized coordinate system.
     𝛉 = (inv(𝐓') ⊗ inv(𝐓ʹ')) * method.𝛉₀
     # Map covariance matrices to the normalized coordinate system.
-    Λʹ = transform(CovarianceMatrices(), CanonicalToHartley(), Λ , tuple(𝐓,𝐓ʹ))
+    Λ₁ = transform(CovarianceMatrices(), CanonicalToHartley(), Λ₀ , 𝐓)
+    Λ₁ʹ = transform(CovarianceMatrices(), CanonicalToHartley(), Λ₀ʹ , 𝐓ʹ)
     for i = 1:method.max_iter
-        𝐗 = X(AML(),FundamentalMatrix(), 𝛉, Λʹ, ℳ, ℳʹ)
-        (λ::Float64, 𝛉⁺::Vector{Float64}) = smallest_eigenpair(𝐗/N)
+        𝐗 = X(AML(),FundamentalMatrix(), 𝛉, (Λ₁,Λ₁ʹ), (𝒪, 𝒪ʹ))
+        λ, 𝛉⁺ = smallest_eigenpair(Symmetric(𝐗/N))
         𝛉 = reshape(𝛉⁺,length(𝛉⁺),1)
     end
-    𝐅::Matrix{Float64} = reshape(𝛉,(3,3))
-    enforce_ranktwo!(𝐅)
+    𝐅 = reshape(𝛉,(3,3))
+    𝐅 = enforce_ranktwo!(Array(𝐅))
     # Transform estimate back to the original (unnormalised) coordinate system.
     𝐅 = 𝐓ʹ'*𝐅*𝐓
 end
@@ -84,7 +88,7 @@ function mean_covariance(entity::ProjectiveEntity, matches...)
 end
 
 
-function enforce_ranktwo!(𝐅::Matrix{Float64})::Matrix{Float64}
+function enforce_ranktwo!(𝐅::AbstractArray)
     # Enforce the rank-2 constraint.
     U,S,V = svd(𝐅)
     S[end] = 0.0

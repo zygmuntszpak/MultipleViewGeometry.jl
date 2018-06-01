@@ -28,31 +28,42 @@ c = 𝑛(h)
 
 
 """
-function 𝑛(v::Vector{T}) where T<:Real
+function 𝑛(v::AbstractArray)
     if v[end] != 0 && v[end] != 1
-        v = v ./ v[end]
+        v .= v ./ v[end]
     else
         v
     end
 end
 
-function smallest_eigenpair(A::AbstractArray{T,2}) where T <:Real
-    F = eigfact(A)::Base.LinAlg.Eigen{Float64,Float64,Array{Float64,2},Array{Float64,1}}
+
+function ∂𝑛(𝐧::AbstractArray)
+    k = length(𝐧)
+    𝐞ₖ = fill(0.0,(k,1))
+    𝐞ₖ[k] = 1
+    1/𝐧[k]*eye(k) - 1/𝐧[k]^2 * 𝐧 * 𝐞ₖ'
+end
+
+
+function smallest_eigenpair(A::AbstractArray)
+    F = eigfact(A)
     index = indmin(F[:values])
     (F[:values][index], F[:vectors][:,index])
 end
 
-function smallest_eigenpair(A::AbstractArray{T,2},B::AbstractArray{T,2}) where T <:Real
-    F = eigfact(A,B)::Base.LinAlg.GeneralizedEigen{Float64,Float64,Array{Float64,2},Array{Float64,1}}
+function smallest_eigenpair(A::AbstractArray,B::AbstractArray)
+    F = eigfact(A,B)
     index = indmin(F[:values])
     (F[:values][index], F[:vectors][:,index])
 end
 
-function vec2antisym(v::AbstractArray{T})  where T<:Real
+
+function vec2antisym(v::AbstractArray)
     if length(v) != 3
          throw(ArgumentError("The operation is only defined for a length-3 vector."))
     end
-    𝐒::Matrix{T} = [  0  -v[3]    v[2] ;
+    𝐒  = @SMatrix [   0  -v[3]    v[2] ;
                     v[3]    0    -v[1] ;
                    -v[2]  v[1]      0]
+
 end
