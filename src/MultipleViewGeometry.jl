@@ -42,13 +42,16 @@ export construct
 export construct
 
 # Functions exported from `project.jl`
-export project
+export project, epipole
 
 # Functions exported from `rotations.jl`
 export rotx, roty, rotz, rotxyz, rodrigues2matrix
 
 # Functions exported from `cost_functions.jl`
 export cost, X, covariance_matrix, covariance_matrix_debug
+
+# Functions exported from `draw.jl`
+export draw!, EpipolarLineGraphic
 
 include("math_aliases/ModuleMathAliases.jl")
 include("types/ModuleTypes.jl")
@@ -62,6 +65,7 @@ include("moments/ModuleMoments.jl")
 include("cost_function/ModuleCostFunction.jl")
 include("estimate/ModuleEstimation.jl")
 include("construct/ModuleConstruct.jl")
+include("draw/ModuleDraw.jl")
 
 
 using .ModuleMathAliases
@@ -76,6 +80,7 @@ using .ModuleEstimation
 using .ModuleMoments
 using .ModuleCostFunction
 using .ModuleConstruct
+using .ModuleDraw
 
 
 # package code goes here

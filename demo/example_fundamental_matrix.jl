@@ -1,58 +1,65 @@
-using MultipleViewGeometry, Images, ImageFeatures, ImageView
+using MultipleViewGeometry, Images
 using BenchmarkTools, Compat
-using StaticArrays, MAT, Plots, PyPlot
+using StaticArrays, MAT, Plots
 
+# Load MATLAB matrices that represent a pair of images and that contain
+# a set of manually matched corresponding points.
 file = matopen("./data/sene-adelaideRMF.mat")
-# img1 = read(file,"img1")
-# img2 = read(file,"img2")
 img1 = colorview(RGB, normedview(permutedims(read(file,"img1"),[3,1,2])))
 img2 = colorview(RGB, normedview(permutedims(read(file,"img2"),[3,1,2])))
 inlier_pts1 = read(file,"inlierPts1")
 inlier_pts2 = read(file,"inlierPts2")
 close(file)
 
+# Conver the images to Grayscale. 
 img1g = Gray.(img1)
 img2g = Gray.(img2)
 
-x = 1:10; y = rand(10); # These are the plotting data
-plot(x,y)
-#pyplot()
-plotly()
+plotlyjs()
 
-p = Plots.plot(img1g)
-Plots.plot!(inlier_pts1[1,:],inlier_pts1[2,:],seriestype=:scatter,w=5)
+_, npts1 = size(inlier_pts1)
+_, npts2 = size(inlier_pts2)
 
-p2 = Plots.plot(img2g)
-Plots.plot!(inlier_pts2[1,:],inlier_pts2[2,:],seriestype=:scatter,w=5)
+# Construct a set of corresponding points expressed in homogeneous coordinates.
+ℳ = [ Point2DH(vcat(inlier_pts1[:,n],1)) for n in 1:npts1]
+ℳʹ =  [ Point2DH(vcat(inlier_pts2[:,n],1)) for n in 1:npts2]
 
-#Plots.plot(img1g)
-#Plots.plot!(x->200sin(.05x)+300, 0, 700, seriestype=:scatter,w=5)
+# Estimate the Fundamental matrix from the corresponding points using the
+# Direct Linear Transform algorithm.
+𝐅₀ = estimate(FundamentalMatrix(),DirectLinearTransform(),  (ℳ, ℳʹ))
 
-#img = reinterpret(N0f8, img1)
-# test = permutedims(img1,[3,1,2])
-# img_l = colorview(RGB, normedview(test))
-# img_r = colorview(RGB, normedview(test))
-# img1 = Gray.(img1)
-#
-# img = colorview(Gray,img1)
-#
-# colorview(RGB,img1)
-#
-# img = reinterpret(N0f8, img1)
-# test = colorview(RGB,img,size(img))
-#
-# test = channelview(img)
-#
-# Gray.(test)
-#
-# test = permutedims(img,[3,1,2])
-# Gray.(channelview(test))
-# Gray.(test)
-#
-# colorview(RGB, normedview(test))
+# Plot Keypoints, epipole and concomitant epipolar lines in the first view.
+p1 = Plots.plot(img1g,grid = false, box = :none, legend = false, size = (455,341))
+for n = 1:25:npts1
+    m = ℳ[n]
+    # Epipolar line in the first image.
+    l = 𝑛(𝐅₀'*ℳʹ[n])
+    draw!(EpipolarLineGraphic(), l, size(img1), p1)
+    # Keypoint.
+    Plots.plot!([m[1]],[m[2]], grid = false, box = :none, legend = false,
+                    seriestype = :scatter, w = 5, aspect_ratio = :equal)
+end
+e = epipole(𝐅₀)
+Plots.plot!([e[1]],[e[2]], grid = false, box = :none, legend = false,
+            seriestype = :scatter, markershape = :diamond, markerstrokecolor = :red,
+            markersize = 5, aspect_ratio = :equal)
+
+# Plot Keypoints and concomitant epipolar lines in the second view.
+p2 = Plots.plot(img2g,grid = false, box = :none, legend = false)
+for n = 1:25:npts2
+    mʹ = ℳʹ[n]
+    # Epipolar line in the second image.
+    l = 𝑛(𝐅₀*ℳ[n])
+    draw!(EpipolarLineGraphic(), l, size(img2), p2)
+    Plots.plot!([mʹ[1]],[mʹ[2]], grid = false, box = :none, legend = false,
+                    seriestype = :scatter, w = 5, aspect_ratio = :equal)
+end
+eʹ = epipole(𝐅₀')
+Plots.plot!([eʹ[1]],[eʹ[2]], grid = false, box = :none, legend = false,
+            seriestype = :scatter, markershape = :diamond, markerstrokecolor = :red,
+            markersize = 5, aspect_ratio = :equal)
 
 
-# using PyPlot
-# x = linspace(0,2*pi,1000); y = sin.(3 * x + 4 * cos.(2 * x));
-# plot(x, y, color="red", linewidth=2.0, linestyle="--")
-# title("A sinusoidally modulated sinusoid")
+# Display both views simultaneously.
+p3 = Plots.plot(p1,p2,layout=(1,2), legend = false)
+display(p3)
