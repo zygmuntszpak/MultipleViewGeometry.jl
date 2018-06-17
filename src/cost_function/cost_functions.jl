@@ -1,8 +1,8 @@
 
 
 function cost(c::CostFunction, entity::FundamentalMatrix, 𝛉::AbstractArray, 𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
-    ℳ, ℳʹ = collect(𝒟)
-    Λ₁, Λ₂ = collect(𝒞)
+    ℳ, ℳʹ = 𝒟
+    Λ₁, Λ₂ = 𝒞
     Jₐₘₗ = 0.0
     N = length(𝒟[1])
     𝚲ₙ = @MMatrix zeros(4,4)
@@ -130,7 +130,7 @@ function covariance_matrix(c::CostFunction, s::CanonicalApproximation, entity::F
     𝚲  = _covariance_matrix(AML(),FundamentalMatrix(), 𝛉₁, (Λ₁,Λ₁ʹ), (𝒪 , 𝒪ʹ))
 
     𝛉₁ =  𝛉₁ / norm(𝛉₁)
-    
+
     # Derivative of the determinant of 𝚯 = reshape(𝛉₁,(3,3)).
     φ₁ = 𝛉₁[5]*𝛉₁[9] - 𝛉₁[8]*𝛉₁[6]
     φ₂ = -(𝛉₁[4]*𝛉₁[5] - 𝛉₁[7]*𝛉₁[6])
@@ -158,8 +158,8 @@ end
 
 function _covariance_matrix(c::CostFunction, entity::FundamentalMatrix, 𝛉::AbstractArray, 𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
     𝛉 = 𝛉 / norm(𝛉)
-    ℳ, ℳʹ = collect(𝒟)
-    Λ₁, Λ₂ = collect(𝒞)
+    ℳ, ℳʹ = 𝒟
+    Λ₁, Λ₂ = 𝒞
     N = length(𝒟[1])
     𝚲ₙ = @MMatrix zeros(4,4)
     𝐞₁ = @SMatrix [1.0; 0.0; 0.0]
@@ -233,8 +233,8 @@ function _X(c::CostFunction, entity::ProjectiveEntity, 𝛉::AbstractArray,𝒞:
     𝐍 = fill(0.0,(l,l))
     𝐌 = fill(0.0,(l,l))
     N = length(𝒟[1])
-    ℳ, ℳʹ = collect(𝒟)
-    Λ₁, Λ₂ = collect(𝒞)
+    ℳ, ℳʹ = 𝒟
+    Λ₁, Λ₂ = 𝒞
     𝚲ₙ = @MMatrix zeros(4,4)
     𝐞₁ = @SMatrix [1.0; 0.0; 0.0]
     𝐞₂ = @SMatrix [0.0; 1.0; 0.0]
@@ -291,8 +291,8 @@ function T(c::CostFunction, entity::ProjectiveEntity, 𝛉::AbstractArray, 𝒞:
     𝐌 = fill(0.0,(l,l))
     𝐓 = fill(0.0,(l,l))
     N = length(𝒟[1])
-    ℳ, ℳʹ = collect(𝒟)
-    Λ₁, Λ₂ = collect(𝒞)
+    ℳ, ℳʹ = 𝒟
+    Λ₁, Λ₂ = 𝒞
     𝚲ₙ = @MMatrix zeros(4,4)
     𝐞₁ = @SMatrix [1.0; 0.0; 0.0]
     𝐞₂ = @SMatrix [0.0; 1.0; 0.0]

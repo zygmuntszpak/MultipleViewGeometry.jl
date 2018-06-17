@@ -10,6 +10,6 @@ export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
 export CovarianceMatrices
 export Point2DH, Point3DH
 export HessianApproximation, CanonicalApproximation, CovarianceEstimationScheme
-
+export NoiseModel,GaussianNoise
 include("types.jl")
 end

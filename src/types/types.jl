@@ -47,6 +47,9 @@ abstract type CoordinateSystemTransformation end
 
 abstract type CovarianceEstimationScheme end
 
+abstract type NoiseModel end
+
+
 type FundamentalMatrix <: ProjectiveEntity
 end
 
@@ -77,8 +80,6 @@ end
 type HessianApproximation <: CovarianceEstimationScheme
 end
 
-
-
 type Taubin <: EstimationAlgorithm
 end
 
@@ -93,4 +94,9 @@ type HartleyToCanonical <: CoordinateSystemTransformation
 end
 
 type CovarianceMatrices
+end
+
+
+type GaussianNoise <: NoiseModel
+
 end

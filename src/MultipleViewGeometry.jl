@@ -16,6 +16,7 @@ export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
 export CovarianceMatrices
 export Point2DH, Point3DH
 export HessianApproximation, CanonicalApproximation, CovarianceEstimationScheme
+export NoiseModel, GaussianNoise
 
 # Aliases exported from math_aliases.jl
 export ⊗, ∑, √
@@ -51,7 +52,17 @@ export rotx, roty, rotz, rotxyz, rodrigues2matrix
 export cost, X, covariance_matrix, covariance_matrix_debug
 
 # Functions exported from `draw.jl`
-export draw!, EpipolarLineGraphic
+export draw!, EpipolarLineGraphic, LineSegment3D, PlaneSegment3D, Camera3D
+export WorldCoordinateSystem3D
+
+# Functions exported from `constraints.jl`
+export satisfy, EpipolarConstraint, Constraint
+
+# Functions exported from `triangulation.jl`
+export triangulate
+
+# Functions exported from `noise.jl`
+export perturb
 
 include("math_aliases/ModuleMathAliases.jl")
 include("types/ModuleTypes.jl")
@@ -66,7 +77,9 @@ include("cost_function/ModuleCostFunction.jl")
 include("estimate/ModuleEstimation.jl")
 include("construct/ModuleConstruct.jl")
 include("draw/ModuleDraw.jl")
-
+include("constraints/ModuleConstraints.jl")
+include("triangulation/ModuleTriangulation.jl")
+include("noise/ModuleNoise.jl")
 
 using .ModuleMathAliases
 using .ModuleTypes
@@ -81,6 +94,9 @@ using .ModuleMoments
 using .ModuleCostFunction
 using .ModuleConstruct
 using .ModuleDraw
+using .ModuleConstraints
+using .ModuleTriangulation
+using .ModuleNoise
 
 
 # package code goes here

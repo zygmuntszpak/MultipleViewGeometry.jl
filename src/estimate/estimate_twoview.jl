@@ -1,5 +1,5 @@
 function estimate(entity::FundamentalMatrix, method::DirectLinearTransform, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
-    ℳ, ℳʹ =  collect(𝒟)
+    ℳ, ℳʹ =  𝒟
     N = length(ℳ)
     if (N != length(ℳʹ))
           throw(ArgumentError("There should be an equal number of points for each view."))

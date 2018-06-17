@@ -11,7 +11,7 @@ inlier_pts1 = read(file,"inlierPts1")
 inlier_pts2 = read(file,"inlierPts2")
 close(file)
 
-# Conver the images to Grayscale. 
+# Conver the images to Grayscale.
 img1g = Gray.(img1)
 img2g = Gray.(img2)
 
@@ -63,3 +63,5 @@ Plots.plot!([eʹ[1]],[eʹ[2]], grid = false, box = :none, legend = false,
 # Display both views simultaneously.
 p3 = Plots.plot(p1,p2,layout=(1,2), legend = false)
 display(p3)
+
+𝐅₀*e
