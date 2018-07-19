@@ -1,0 +1,9 @@
+module ModuleTriangulation
+using MultipleViewGeometry.ModuleMathAliases, MultipleViewGeometry.ModuleDataNormalization
+using MultipleViewGeometry.ModuleTypes, MultipleViewGeometry.ModuleProjection
+using MultipleViewGeometry.ModuleConstraints, MultipleViewGeometry.ModuleConstruct
+using MultipleViewGeometry.ModuleOperators
+using StaticArrays
+export triangulate
+include("triangulate.jl")
+end

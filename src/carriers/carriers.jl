@@ -1,8 +1,6 @@
 # Carrier vector for fundamental matrix estimation.
 @inline function ∂ₓu(entity::FundamentalMatrix, 𝒟)
     m, mʹ = collect(𝒟)
-    # 𝐦  = 𝑛(collect(Float64,m.coords))
-    # 𝐦ʹ = 𝑛(collect(Float64,mʹ.coords))
     𝐦  = 𝑛(m)
     𝐦ʹ = 𝑛(mʹ)
     ∂ₓu(entity, 𝐦 , 𝐦ʹ)
@@ -17,8 +15,6 @@ end
 
 @inline function uₓ(entity::FundamentalMatrix, 𝒟)
     m, mʹ = collect(𝒟)
-    # 𝐦  = 𝑛(collect(Float64,m.coords))
-    # 𝐦ʹ = 𝑛(collect(Float64,mʹ.coords))
     𝐦  = 𝑛(m)
     𝐦ʹ = 𝑛(mʹ)
     uₓ(entity, 𝐦 , 𝐦ʹ)
