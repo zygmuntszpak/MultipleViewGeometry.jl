@@ -84,10 +84,11 @@ function draw!(g::WorldCoordinateSystem3D, scale,  p::RecipesBase.AbstractPlot{<
     𝐞₃ = [0,  0,   1]
     𝐨  = [0,  0,  0]
 
+    s = scale*300
     # Draw the world coordinate axes.
-    draw!(LineSegment3D(), 𝐨, 𝐨 + scale*𝐞₁, :red, p)
-    draw!(LineSegment3D(), 𝐨, 𝐨 + scale*𝐞₂, :green, p)
-    draw!(LineSegment3D(), 𝐨, 𝐨 + scale*𝐞₃, :blue, p)
+    draw!(LineSegment3D(), 𝐨, 𝐨 + s*𝐞₁, :red, p)
+    draw!(LineSegment3D(), 𝐨, 𝐨 + s*𝐞₂, :green, p)
+    draw!(LineSegment3D(), 𝐨, 𝐨 + s*𝐞₃, :blue, p)
 end
 
 function draw!(g::Camera3D, 𝐊::AbstractArray,  𝐑::AbstractArray, 𝐭::AbstractArray, scale,  p::RecipesBase.AbstractPlot{<:RecipesBase.AbstractBackend})
@@ -99,10 +100,10 @@ function draw!(g::Camera3D, 𝐊::AbstractArray,  𝐑::AbstractArray, 𝐭::Abs
     𝐨  = [0,  0,  0]
 
     # Initial camera imaging plane.
-    𝐩₁ =  [-125,  125,  -50]
-    𝐩₂ =  [125,  125,  -50]
-    𝐩₃ =  [125, -125, -50]
-    𝐩₄ =  [-125,  -125, -50]
+    𝐩₁ =  scale*[-125,  125,  50]
+    𝐩₂ =  scale*[125,  125,  50]
+    𝐩₃ =  scale*[125, -125, 50]
+    𝐩₄ =  scale*[-125,  -125, 50]
 
     # Initial camera center.
     𝐜 = [0.0, 0.0, 0.0]
@@ -117,10 +118,11 @@ function draw!(g::Camera3D, 𝐊::AbstractArray,  𝐑::AbstractArray, 𝐭::Abs
     draw!(LineSegment3D(), 𝐜, 𝐑*𝐩₃ + 𝐭, :black, p)
     draw!(LineSegment3D(), 𝐜, 𝐑*𝐩₄ + 𝐭, :black, p)
 
-    # Draw camera coordinate axes for the first camera.
-    draw!(LineSegment3D(), 𝐜, (𝐑*scale*𝐞₁ + 𝐭), :red, p)
-    draw!(LineSegment3D(), 𝐜, (𝐑*scale*𝐞₂ + 𝐭), :green, p)
-    draw!(LineSegment3D(), 𝐜, (𝐑*scale*𝐞₃ + 𝐭), :blue, p)
+    s = scale*200
+    # Draw camera coordinate axes for the camera.
+    draw!(LineSegment3D(), 𝐜, (𝐑*s*𝐞₁ + 𝐭), :red, p)
+    draw!(LineSegment3D(), 𝐜, (𝐑*s*𝐞₂ + 𝐭), :green, p)
+    draw!(LineSegment3D(), 𝐜, (𝐑*s*𝐞₃ + 𝐭), :blue, p)
 
 
 end

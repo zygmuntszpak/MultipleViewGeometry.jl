@@ -8,6 +8,7 @@ using StaticArrays
 
 # Types exported from `types.jl`
 export HomogeneousPoint, ProjectiveEntity, FundamentalMatrix, ProjectionMatrix
+export EssentialMatrix
 export CameraModel, Pinhole, CanonicalLens
 export EstimationAlgorithm, DirectLinearTransform, Taubin, FundamentalNumericalScheme
 export CostFunction, ApproximateMaximumLikelihood, AML
@@ -35,6 +36,9 @@ export moments
 
 # Functions exported from `estimate_twoview.jl`
 export estimate
+
+# Functions exported from `construct_essentialmatrix.jl`
+export construct
 
 # Functions exported from `construct_fundamentalmatrix.jl`
 export construct

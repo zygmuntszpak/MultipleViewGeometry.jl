@@ -53,6 +53,9 @@ abstract type NoiseModel end
 type FundamentalMatrix <: ProjectiveEntity
 end
 
+type EssentialMatrix <: ProjectiveEntity
+end
+
 type ProjectionMatrix <: ProjectiveEntity
 end
 
