@@ -15,7 +15,7 @@ close(file)
 img1g = Gray.(img1)
 img2g = Gray.(img2)
 
-plotlyjs()
+#plotlyjs()
 
 _, npts1 = size(inlier_pts1)
 _, npts2 = size(inlier_pts2)

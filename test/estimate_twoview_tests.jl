@@ -1,11 +1,12 @@
 using MultipleViewGeometry, Base.Test
-using StaticArrays
+using MultipleViewGeometry.ModuleTypes
+using StaticArrays, Calculus
 # Tests for fundamental matrix estimation
 
 
 𝒳 = [Point3DH(x,y,z,1.0)
                         for x=-100:5:100 for y=-100:5:100 for z=1:-50:-100]
-
+𝒳 = 𝒳[1:50:end]
 # Intrinsic and extrinsic parameters of camera one.
 𝐊₁ = eye(3)
 𝐑₁ = eye(3)
@@ -43,7 +44,7 @@ for correspondence in zip(1:length(ℳ),ℳ, ℳʹ)
     i, m , mʹ = correspondence
     𝐦  = 𝑛(m)
     𝐦ʹ = 𝑛(mʹ)
-    residual[i] = (𝐦ʹ'*𝐅*𝐦) 
+    residual[i] = (𝐦ʹ'*𝐅*𝐦)
 end
 
 @test isapprox(sum(residual), 0.0; atol = 1e-7)
@@ -79,3 +80,11 @@ end
 # 𝐅ₜ = 𝐅ₜ / sign(𝐅ₜ[1,2])
 #
 # @test 𝐅 ≈ 𝐅ₜ
+
+# Test the Bundle Adjustment estimator on the Fundamental matrix problem.
+𝐅, lsqFit = estimate(FundamentalMatrix(),
+                        BundleAdjustment(reshape(𝐅₀,9,1), 5, 1e-10),
+                                                           (ℳ, ℳʹ))
+𝐅 = 𝐅 / norm(𝐅)
+𝐅 = 𝐅 / sign(𝐅[1,2])
+@test 𝐅 ≈ 𝐅ₜ

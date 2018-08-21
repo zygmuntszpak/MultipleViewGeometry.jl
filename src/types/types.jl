@@ -71,6 +71,12 @@ end
 type DirectLinearTransform <: EstimationAlgorithm
 end
 
+type BundleAdjustment <: EstimationAlgorithm
+    𝛉₀::Matrix{Float64}
+    max_iter::Int8
+    toleranceθ::Float64
+end
+
 type FundamentalNumericalScheme <: EstimationAlgorithm
     𝛉₀::Matrix{Float64}
     max_iter::Int8

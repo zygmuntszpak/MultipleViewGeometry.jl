@@ -36,6 +36,28 @@ function 𝑛(v::AbstractArray)
     end
 end
 
+function 𝑛(v::SVector)
+    if v[end] != 0 && v[end] != 1
+        v / v[end]
+    else
+        v
+    end
+end
+
+function hom⁻¹(v::SVector)
+    pop(v / v[end])
+end
+
+function hom(v::SVector)
+    push(v,1)
+end
+
+function ∂hom⁻¹(𝐧::SVector)
+    k = length(𝐧)
+    𝐞ₖ = push(zeros(SVector{k-1}),1.0)
+    𝐈 = @SMatrix eye(k)
+    1/𝐧[k]*𝐈 - 1/𝐧[k]^2 * 𝐧 * 𝐞ₖ'
+end
 
 function ∂𝑛(𝐧::AbstractArray)
     k = length(𝐧)
