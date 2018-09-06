@@ -5,6 +5,7 @@ export HomogeneousPoint, ProjectiveEntity, FundamentalMatrix, ProjectionMatrix
 export HomogeneousCoordinates, EssentialMatrix
 export CameraModel, Pinhole, CanonicalLens
 export EstimationAlgorithm, DirectLinearTransform, Taubin, FundamentalNumericalScheme
+export BundleAdjustment
 export CostFunction, ApproximateMaximumLikelihood, AML
 export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
 export CovarianceMatrices

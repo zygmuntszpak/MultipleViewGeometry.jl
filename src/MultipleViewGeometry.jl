@@ -11,6 +11,7 @@ export HomogeneousPoint, ProjectiveEntity, FundamentalMatrix, ProjectionMatrix
 export EssentialMatrix
 export CameraModel, Pinhole, CanonicalLens
 export EstimationAlgorithm, DirectLinearTransform, Taubin, FundamentalNumericalScheme
+export BundleAdjustment
 export CostFunction, ApproximateMaximumLikelihood, AML
 export HomogeneousCoordinates
 export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
@@ -23,7 +24,7 @@ export NoiseModel, GaussianNoise
 export ⊗, ∑, √
 
 # Functions exported from `operators.jl`.
-export 𝑛, ∂𝑛, smallest_eigenpair,vec2antisym
+export 𝑛, ∂𝑛, smallest_eigenpair,vec2antisym, hom⁻¹, hom, ∂hom⁻¹
 
 # Functions exported from `hartley_transformation.jl`.
 export hartley_normalization, hartley_normalization!, hartley_transformation
