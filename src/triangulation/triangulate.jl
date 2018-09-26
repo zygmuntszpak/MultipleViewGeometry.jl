@@ -2,7 +2,7 @@ function triangulate(method::DirectLinearTransform, 𝐅::AbstractArray, 𝒟::T
     ℳ, ℳʹ =  𝒟
     𝐏₁, 𝐏₂ = construct(ProjectionMatrix(),𝐅)
     N = length(ℳ)
-    𝒴 = Array{Point3DH}(N)
+    𝒴 = Array{Point3DH}(undef,N)
     for n = 1:N
         𝐦 = ℳ[n]
         𝐦ʹ = ℳʹ[n]
@@ -30,7 +30,7 @@ end
 function triangulate(method::DirectLinearTransform, 𝐏₁::AbstractArray, 𝐏₂::AbstractArray, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
     ℳ, ℳʹ =  𝒟
     N = length(ℳ)
-    𝒴 = Array{Point3DH}(N)
+    𝒴 = Array{Point3DH}(undef,N)
     for n = 1:N
         𝐦 = ℳ[n]
         𝐦ʹ = ℳʹ[n]

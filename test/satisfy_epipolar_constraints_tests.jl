@@ -1,12 +1,12 @@
-using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
 using MultipleViewGeometry.ModuleConstraints
-using BenchmarkTools, Compat
-using StaticArrays
+using BenchmarkTools
+using StaticArrays, Random, LinearAlgebra
 
 # Fix random seed.
-srand(1234)
+Random.seed!(1234)
 
 # Test for cost functions.
 
@@ -16,13 +16,13 @@ srand(1234)
                         for x=-1:0.5:10 for y=-1:0.5:10 for z=2:-0.1:1]
 
 # Intrinsic and extrinsic parameters of camera one.
-𝐊₁ = @SMatrix eye(3)
-𝐑₁ = @SMatrix eye(3)
+𝐊₁ = SMatrix{3,3}(1.0I)
+𝐑₁ = SMatrix{3,3}(1.0I)
 𝐭₁ =  @SVector [0.0, 0.0, -10]
 
 # Intrinsic and extrinsic parameters of camera two.
-𝐊₂ = @SMatrix eye(3)
-𝐑₂ = @SMatrix eye(3) #SMatrix{3,3,Float64,9}(rotxyz(pi/10,pi/10,pi/10))
+𝐊₂ = SMatrix{3,3}(1.0I)
+𝐑₂ = SMatrix{3,3}(1.0I) #SMatrix{3,3,Float64,9}(rotxyz(pi/10,pi/10,pi/10))
 𝐭₂ = @SVector [10.0, 10.0, -10.0]
 
 # Camera projection matrices.

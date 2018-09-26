@@ -1,7 +1,7 @@
-using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
-using BenchmarkTools, Compat
+using BenchmarkTools, LinearAlgebra
 using StaticArrays
 
 # Test for cost functions.
@@ -12,13 +12,13 @@ using StaticArrays
                         for x=-1:0.5:10 for y=-1:0.5:10 for z=2:-0.1:1]
 
 # Intrinsic and extrinsic parameters of camera one.
-𝐊₁ = @SMatrix eye(3)
-𝐑₁ = @SMatrix eye(3)
+𝐊₁ = SMatrix{3,3}(Matrix{Float64}(I, 3, 3))
+𝐑₁ = SMatrix{3,3}(Matrix{Float64}(I, 3, 3))
 𝐭₁ =  @SVector [0.0, 0.0, -10]
 
 # Intrinsic and extrinsic parameters of camera two.
-𝐊₂ = @SMatrix eye(3)
-𝐑₂ = @SMatrix eye(3) #SMatrix{3,3,Float64,9}(rotxyz(pi/10,pi/10,pi/10))
+𝐊₂ = SMatrix{3,3}(Matrix{Float64}(I, 3, 3))
+𝐑₂ = SMatrix{3,3}(Matrix{Float64}(I, 3, 3)) #SMatrix{3,3,Float64,9}(rotxyz(pi/10,pi/10,pi/10))
 𝐭₂ = @SVector [10.0, 10.0, -10.0]
 
 # Camera projection matrices.
@@ -36,8 +36,8 @@ using StaticArrays
 𝐅 = 𝐅 / sign(𝐅[1,3])
 𝐟 = reshape(𝐅,9,1)
 
-Λ₁ =  [SMatrix{3,3}(diagm([1.0,1.0,0.0])) for i = 1:length(ℳ)]
-Λ₂ =  [SMatrix{3,3}(diagm([1.0,1.0,0.0])) for i = 1:length(ℳ)]
+Λ₁ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
+Λ₂ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
 Jₐₘₗ =  cost(AML(),FundamentalMatrix(), SVector{9}(𝐟), (Λ₁,Λ₂), (ℳ, ℳʹ))
 
 @test isapprox(Jₐₘₗ, 0.0; atol = 1e-14)

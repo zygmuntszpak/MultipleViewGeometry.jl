@@ -3,7 +3,7 @@ using MultipleViewGeometry.ModuleMathAliases, MultipleViewGeometry.ModuleDataNor
 using MultipleViewGeometry.ModuleTypes, MultipleViewGeometry.ModuleProjection
 using MultipleViewGeometry.ModuleConstraints, MultipleViewGeometry.ModuleConstruct
 using MultipleViewGeometry.ModuleOperators
-using StaticArrays
+using StaticArrays, LinearAlgebra
 export triangulate
 include("triangulate.jl")
 end

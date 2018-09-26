@@ -1,5 +1,5 @@
 using MultipleViewGeometry
-using Base.Test
+using Test
 
 
 @testset "Operators Tests" begin include("operators_tests.jl") end

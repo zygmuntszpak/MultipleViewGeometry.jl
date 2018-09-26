@@ -15,7 +15,7 @@ end
 
 function construct( e::ProjectionMatrix, 𝐅::AbstractArray)
     𝐞 = epipole(𝐅')
-    𝐏₁ = eye(3,4)
+    𝐏₁ = Matrix{Float64}(I,3,4)
     𝐏₂ = [vec2antisym(𝐞) * 𝐅  𝐞]
 
     SMatrix{3,4,Float64,3*4}(𝐏₁), SMatrix{3,4,Float64,3*4}(𝐏₂)
@@ -27,7 +27,7 @@ function construct( e::ProjectionMatrix, 𝐄::AbstractArray, 𝒟::Tuple{Abstra
     𝐙 = SMatrix{3,3,Float64,3*3}([0 1 0; -1 0 0; 0 0 0])
     𝐔,𝐒,𝐕 = svd(𝐄)
     𝐭 = 𝐔[:,3]
-    𝐏₁ = SMatrix{3,4,Float64,3*4}(eye(3,4))
+    𝐏₁ = SMatrix{3,4,Float64,3*4}(1.0I)
     𝐏₂₁ = SMatrix{3,4,Float64,3*4}([𝐔*𝐖*𝐕'  𝐭])
     𝐏₂₂ = SMatrix{3,4,Float64,3*4}([𝐔*𝐖'*𝐕' 𝐭])
     𝐏₂₃ = SMatrix{3,4,Float64,3*4}([𝐔*𝐖*𝐕' -𝐭])

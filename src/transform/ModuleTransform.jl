@@ -1,8 +1,7 @@
 module ModuleTransform
-using ImageFiltering.padarray, ImageFiltering.Fill
 using MultipleViewGeometry.ModuleMathAliases, MultipleViewGeometry.ModuleDataNormalization
 using MultipleViewGeometry.ModuleTypes
-using StaticArrays
+using StaticArrays, LinearAlgebra
 export transform
 include("transform.jl")
 end

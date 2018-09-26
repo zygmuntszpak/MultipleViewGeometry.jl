@@ -1,9 +1,9 @@
 using MAT
-using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
-using BenchmarkTools, Compat
-using StaticArrays
+using BenchmarkTools
+using StaticArrays, LinearAlgebra, SparseArrays
 
 file = matopen("debug/mPts1.mat")
 mpts1 = read(file,"mPts1")
@@ -25,8 +25,8 @@ npts, dim  = size(mpts1)
 
 s²  = 1e-7
 s = sqrt(s² )
-Λ₁ =  [SMatrix{3,3}(s² *diagm([1.0,1.0,0.0])) for i = 1:npts]
-Λ₂ =  [SMatrix{3,3}(s² *diagm([1.0,1.0,0.0])) for i = 1:npts]
+Λ₁ =  [SMatrix{3,3}(s² * Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:npts]
+Λ₂ =  [SMatrix{3,3}(s² *Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:npts]
 
 𝒪 = [Point2DH(vcat(mpts1[i,:],[1])) for i =1:npts]
 𝒪ʹ= [Point2DH(vcat(mpts2[i,:],[1])) for i =1:npts]

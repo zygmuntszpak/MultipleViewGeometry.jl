@@ -1,18 +1,18 @@
 abstract type GraphicEntity end
 
-type EpipolarLineGraphic <: GraphicEntity
+mutable struct EpipolarLineGraphic <: GraphicEntity
 end
 
-type LineSegment3D <: GraphicEntity
+mutable struct LineSegment3D <: GraphicEntity
 end
 
-type PlaneSegment3D <: GraphicEntity
+mutable struct PlaneSegment3D <: GraphicEntity
 end
 
-type Camera3D <: GraphicEntity
+mutable struct Camera3D <: GraphicEntity
 end
 
-type WorldCoordinateSystem3D <: GraphicEntity
+mutable struct WorldCoordinateSystem3D <: GraphicEntity
 end
 
 

@@ -1,6 +1,6 @@
 abstract type Constraint end
 
-type EpipolarConstraint <: Constraint
+mutable struct EpipolarConstraint <: Constraint
 end
 
 # Triangulation from Two Views Revisited: Hartley-Sturm vs. Optimal Correction

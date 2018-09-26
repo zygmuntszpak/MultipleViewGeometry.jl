@@ -1,4 +1,4 @@
-using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleTypes
 
 

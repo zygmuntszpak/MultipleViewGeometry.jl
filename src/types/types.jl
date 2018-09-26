@@ -50,62 +50,62 @@ abstract type CovarianceEstimationScheme end
 abstract type NoiseModel end
 
 
-type FundamentalMatrix <: ProjectiveEntity
+mutable struct FundamentalMatrix <: ProjectiveEntity
 end
 
-type EssentialMatrix <: ProjectiveEntity
+mutable struct EssentialMatrix <: ProjectiveEntity
 end
 
-type ProjectionMatrix <: ProjectiveEntity
+mutable struct  ProjectionMatrix <: ProjectiveEntity
 end
 
-type HomogeneousCoordinates <: ProjectiveEntity
+mutable struct  HomogeneousCoordinates <: ProjectiveEntity
 end
 
-type Pinhole <: CameraModel
+mutable struct  Pinhole <: CameraModel
 end
 
-type CanonicalLens <: CameraModel
+mutable struct  CanonicalLens <: CameraModel
 end
 
-type DirectLinearTransform <: EstimationAlgorithm
+mutable struct DirectLinearTransform <: EstimationAlgorithm
 end
 
-type BundleAdjustment <: EstimationAlgorithm
+mutable struct BundleAdjustment <: EstimationAlgorithm
     𝛉₀::Matrix{Float64}
     max_iter::Int8
     toleranceθ::Float64
 end
 
-type FundamentalNumericalScheme <: EstimationAlgorithm
+mutable struct FundamentalNumericalScheme <: EstimationAlgorithm
     𝛉₀::Matrix{Float64}
     max_iter::Int8
     toleranceθ::Float64
 end
 
-type CanonicalApproximation <: CovarianceEstimationScheme
+mutable struct CanonicalApproximation <: CovarianceEstimationScheme
 end
 
-type HessianApproximation <: CovarianceEstimationScheme
+mutable struct HessianApproximation <: CovarianceEstimationScheme
 end
 
-type Taubin <: EstimationAlgorithm
+mutable struct Taubin <: EstimationAlgorithm
 end
 
-type ApproximateMaximumLikelihood <: CostFunction
+mutable struct ApproximateMaximumLikelihood <: CostFunction
 end
 const AML = ApproximateMaximumLikelihood
 
-type CanonicalToHartley <: CoordinateSystemTransformation
+mutable struct CanonicalToHartley <: CoordinateSystemTransformation
 end
 
-type HartleyToCanonical <: CoordinateSystemTransformation
+mutable struct HartleyToCanonical <: CoordinateSystemTransformation
 end
 
-type CovarianceMatrices
+mutable struct CovarianceMatrices
 end
 
 
-type GaussianNoise <: NoiseModel
+mutable struct GaussianNoise <: NoiseModel
 
 end

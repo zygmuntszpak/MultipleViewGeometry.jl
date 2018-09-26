@@ -1,5 +1,5 @@
-using MultipleViewGeometry, Base.Test
-using StaticArrays
+using MultipleViewGeometry, Test
+using StaticArrays, Random
 
 # Vectors are scaled so that the last component is unity.
 v = [2,2,2]

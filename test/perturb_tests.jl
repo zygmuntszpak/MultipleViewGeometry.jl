@@ -1,14 +1,14 @@
-using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
 using MultipleViewGeometry.ModuleConstraints
 using MultipleViewGeometry.ModuleConstruct
 using MultipleViewGeometry.ModuleNoise
-using BenchmarkTools, Compat
+using BenchmarkTools, LinearAlgebra, Random
 using StaticArrays
 
 # Fix random seed.
-srand(1234)
+Random.seed!(1234)
 
 𝒳 = [Point3DH(x,y,z,1.0)
                         for x=-1:1:10 for y=-1:1:10 for z=-1:1:10]

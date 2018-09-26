@@ -43,7 +43,6 @@ equal to ``\\sqrt{d}``.
 
 
 """
-
 function hartley_transformation(ℳ::Vector{T})::SMatrix where T <:AbstractArray
     if isempty(ℳ)
         throw(ArgumentError("Array cannot be empty."))
@@ -52,8 +51,8 @@ function hartley_transformation(ℳ::Vector{T})::SMatrix where T <:AbstractArray
     ndim = length(ℳ[1])-1
     𝐜 = centroid(ℳ)
     σ = root_mean_square(ℳ, 𝐜)
-    σ⁻¹ = 1./σ
-    𝐓 = SMatrix{ndim+1,ndim+1,Float64, (ndim+1)^2}([σ⁻¹*eye(ndim) -σ⁻¹*𝐜[1:end-1] ; zeros(1,ndim) 1.0])
+    σ⁻¹ = 1 ./ σ
+    𝐓 = SMatrix{ndim+1,ndim+1,Float64, (ndim+1)^2}([σ⁻¹*Matrix{Float64}(I,ndim,ndim) -σ⁻¹*𝐜[1:end-1] ; zeros(1,ndim) 1.0])
 end
 
 function centroid(positions::Vector{T}) where T <: AbstractArray

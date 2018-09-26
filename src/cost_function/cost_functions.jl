@@ -47,7 +47,7 @@ end
 
 
 function covariance_matrix(c::CostFunction, s::HessianApproximation, entity::FundamentalMatrix, 𝛉::AbstractArray, 𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
-    𝛉 = 𝛉 / norm(𝛉)
+    𝛉 = SVector{9}(𝛉 / norm(𝛉))
     ℳ, ℳʹ = 𝒟
     Λ₀, Λ₀ʹ = 𝒞
     N = length(ℳ)
@@ -79,7 +79,7 @@ function covariance_matrix(c::CostFunction, s::HessianApproximation, entity::Fun
     S[d] = 0.0
     𝐇⁻¹ = U*diagm(S)*V'
 
-    𝐏 = (1/norm(𝛉₁)) * (eye(9) - ((𝛉₁*𝛉₁') / norm(𝛉₁)^2) )
+    𝐏 = (1/norm(𝛉₁)) * ( Matrix{Float64}(I, 9, 9) - ((𝛉₁*𝛉₁') / norm(𝛉₁)^2) )
     𝚲 = 𝐏 * 𝐇⁻¹ * 𝐏
 
 
@@ -95,20 +95,20 @@ function covariance_matrix(c::CostFunction, s::HessianApproximation, entity::Fun
     φ₉ = 𝛉₁[1]*𝛉₁[5] - 𝛉₁[4]*𝛉₁[2]
     ∂𝛟 = [φ₁; φ₂; φ₃; φ₄; φ₅; φ₆; φ₇; φ₈; φ₉]
 
-    A = [eye(9) ; zeros(1,9)]
-    B = [eye(9) ∂𝛟; ∂𝛟' 0]
+    A = [ Matrix{Float64}(I, 9, 9) ; zeros(1,9)]
+    B = [ Matrix{Float64}(I, 9, 9) ∂𝛟; ∂𝛟' 0]
     𝚲 = inv(B)*A*𝚲*A'*inv(B)
     𝚲 = 𝚲[1:9,1:9]
 
     𝛉₀ = (𝐓' ⊗ 𝐓ʹ') * 𝛉₁
     # Jacobian of the unit normalisation transformation: 𝛉 / norm(𝛉)
-    ∂𝛉= (1/norm(𝛉₀)) * (eye(9) - ((𝛉₀*𝛉₀') / norm(𝛉₀)^2) )
+    ∂𝛉= (1/norm(𝛉₀)) * ( Matrix{Float64}(I, 9, 9) - ((𝛉₀*𝛉₀') / norm(𝛉₀)^2) )
     F = ∂𝛉*(𝐓' ⊗ 𝐓ʹ')
     F * 𝚲 * F'
 end
 
 function covariance_matrix(c::CostFunction, s::CanonicalApproximation, entity::FundamentalMatrix, 𝛉::AbstractArray, 𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
-    𝛉 = 𝛉 / norm(𝛉)
+    𝛉 = SVector{9}(𝛉 / norm(𝛉))
     ℳ, ℳʹ = 𝒟
     Λ₀, Λ₀ʹ = 𝒞
     N = length(ℳ)
@@ -143,15 +143,15 @@ function covariance_matrix(c::CostFunction, s::CanonicalApproximation, entity::F
     φ₉ = 𝛉₁[1]*𝛉₁[5] - 𝛉₁[4]*𝛉₁[2]
     ∂𝛟 = [φ₁; φ₂; φ₃; φ₄; φ₅; φ₆; φ₇; φ₈; φ₉]
 
-    A = [eye(9) ; zeros(1,9)]
-    B = [eye(9) ∂𝛟; ∂𝛟' 0]
+    A = [Matrix{Float64}(I, 9, 9) ; zeros(1,9)]
+    B = [Matrix{Float64}(I, 9, 9) ∂𝛟; ∂𝛟' 0]
     𝚲 = inv(B)*A*𝚲*A'*inv(B)
     𝚲 = 𝚲[1:9,1:9]
 
     𝛉₀ = (𝐓' ⊗ 𝐓ʹ') * 𝛉₁
 
     # Jacobian of the unit normalisation transformation: 𝛉 / norm(𝛉)
-    ∂𝛉= (1/norm(𝛉₀)) * (eye(9) - ((𝛉₀*𝛉₀') / norm(𝛉₀)^2) )
+    ∂𝛉= (1/norm(𝛉₀)) * (Matrix{Float64}(I, 9, 9) - ((𝛉₀*𝛉₀') / norm(𝛉₀)^2) )
     F = ∂𝛉*(𝐓' ⊗ 𝐓ʹ')
     F * 𝚲 * F'
 end
@@ -178,7 +178,7 @@ function _covariance_matrix(c::CostFunction, entity::FundamentalMatrix, 𝛉::Ab
         𝐌 = 𝐌 + 𝐀/(𝛉'*𝐁ₙ*𝛉)
     end
     d = length(𝛉)
-    𝐏 = eye(d) - norm(𝛉)^-2 * (𝛉*𝛉')
+    𝐏 = Matrix{Float64}(I, d, d) - norm(𝛉)^-2 * (𝛉*𝛉')
     U,S,V = svd(𝐌)
     S = SizedArray{Tuple{9}}(S)
     for i = 1:d-1
@@ -229,7 +229,7 @@ end
 
 function _X(c::CostFunction, entity::ProjectiveEntity, 𝛉::AbstractArray,𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
     l = length(𝛉)
-    𝐈ₗ = eye(l)
+    𝐈ₗ = Matrix{Float64}(I,l,l)
     𝐍 = fill(0.0,(l,l))
     𝐌 = fill(0.0,(l,l))
     N = length(𝒟[1])
@@ -285,7 +285,7 @@ end
 
 function T(c::CostFunction, entity::ProjectiveEntity, 𝛉::AbstractArray, 𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
     l = length(𝛉)
-    𝐈ₗ = eye(l)
+    𝐈ₗ = Matrix{Float64}(I, l, l)
     𝐈ₘ = Iₘ(entity)
     𝐍 = fill(0.0,(l,l))
     𝐌 = fill(0.0,(l,l))
@@ -330,5 +330,5 @@ end
 
 
 @inline function Iₘ(entity::FundamentalMatrix)
-    eye(1)
+     Matrix{Float64}(I, 1, 1)
 end
