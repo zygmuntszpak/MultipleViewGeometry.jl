@@ -80,13 +80,21 @@ function estimate(entity::FundamentalMatrix, method::BundleAdjustment,  𝒟::Tu
 
     index₁ = SVector(1,2)
     index₂ = SVector(3,4)
-    pts = Matrix{Float64}(4,N)
+    pts = Matrix{Float64}(undef,4,N)
     for n = 1:N
         pts[index₁,n] = ℳ[n][index₁]
         pts[index₂,n] = ℳʹ[n][index₁]
     end
 
-    fit = curve_fit(model_fundamental, jacobian_model, 𝐏₁, reinterpret(Float64,pts,(4*N,)), 𝛉; show_trace = false)
+
+    #fit = curve_fit(model_fundamental, jacobian_model, 𝐏₁, reinterpret(Float64,pts,(4*N,1)), 𝛉; show_trace = false)
+    #fit = curve_fit(model_fundamental, jacobian_model, 𝐏₁, temp, 𝛉; show_trace = false)
+    fit = curve_fit(model_fundamental, jacobian_model,  𝐏₁, reshape(reinterpret(Float64,vec(pts)),(4*N,)) , 𝛉; show_trace = false)
+    #reshape(reinterpret(T, vec(a)), dims)
+    #reinterpret(::Type{T}, a::Array{S}, dims::NTuple{N, Int}) where {T, S, N}
+    #@show typeof(reshape(reinterpret(Float64,vec(pts)),(4*N,)))
+    #@show typeof(reinterpret(Float64,pts,(4*N,)))
+    #fit = curve_fit(model_fundamental, jacobian_model, 𝐏₁, reshape(reinterpret(Float64,pts),(4*N,)), 𝛉; show_trace = false)
     𝐏₂ = reshape(fit.param[1:12],(3,4))
     𝐅 = construct(FundamentalMatrix(), 𝐏₁, 𝐏₂)
     𝐅, fit
@@ -97,7 +105,7 @@ function model_fundamental(𝐏₁,𝛉)
     N = Int((length(𝛉) - 12) / 3)
     index₁ = SVector(1,2)
     index₂ = SVector(3,4)
-    reprojections = Matrix{Float64}(4,N)
+    reprojections = Matrix{Float64}(undef,4,N)
     𝛉v = @view 𝛉[1:12]
     𝐏₂ = SMatrix{3,4,Float64,12}(reshape(𝛉v,(3,4)))
     i = 13
@@ -109,7 +117,7 @@ function model_fundamental(𝐏₁,𝛉)
         reprojections[index₂,n] = hom⁻¹(𝐏₂ * M)
         i = i + 3
     end
-    reinterpret(Float64,reprojections,(4*N,))
+    reshape(reinterpret(Float64,vec(reprojections)),(4*N,))
 end
 
 function jacobian_model(𝐏₁,𝛉)
@@ -117,12 +125,16 @@ function jacobian_model(𝐏₁,𝛉)
     N = Int((length(𝛉) - 12) / 3)
     index₁ = SVector(1,2)
     index₂ = SVector(3,4)
-    reprojections = Matrix{Float64}(4,N)
+    reprojections = Matrix{Float64}(undef,4,N)
     𝛉v = @view 𝛉[1:12]
     𝐏₂ = SMatrix{3,4,Float64,12}(reshape(𝛉v,(3,4)))
-    𝐉 = zeros(4, N, 12+3*N)
+    𝐉 = zeros(4*N,12+3*N)
+    # Create a view of the jacobian matrix 𝐉 and reshape it so that
+    # it will be more convenient to index into the appropriate entires
+    # whilst looping over all of the data points.
+    𝐉v = reshape(reinterpret(Float64,𝐉), 4, N, 12+3*N)
     𝐀 = SMatrix{2,3,Float64,6}(1,0,0,1,0,0)
-    𝐈₃ = @SMatrix eye(3)
+    𝐈₃ = SMatrix{3,3}(1.0I)
     i = 13
     for n = 1:N
         # Extract 3D point and convert to homogeneous coordinates
@@ -136,12 +148,12 @@ function jacobian_model(𝐏₁,𝛉)
         # ∂𝐫₁_d𝐏₁ is the zero vector.
         ∂𝐫₂_d𝐏₂ = 𝐀 * ∂hom⁻¹(𝐏₂ * 𝐌) * (𝐌' ⊗ 𝐈₃)
 
-        𝐉[index₂,n,1:12] = ∂𝐫₂_d𝐏₂
-        𝐉[index₁,n,i:i+2] = ∂𝐫₁_d𝐌[:,1:3]
-        𝐉[index₂,n,i:i+2] = ∂𝐫₂_d𝐌[:,1:3]
+        𝐉v[index₂,n,1:12] = ∂𝐫₂_d𝐏₂
+        𝐉v[index₁,n,i:i+2] = ∂𝐫₁_d𝐌[:,1:3]
+        𝐉v[index₂,n,i:i+2] = ∂𝐫₂_d𝐌[:,1:3]
         i = i + 3
     end
-    reinterpret(Float64,𝐉,(4*N,12+3*N))
+    𝐉
 end
 
 #𝛉 = reshape(𝛉₀,length(𝛉₀),1)
@@ -173,13 +185,13 @@ function enforce_ranktwo!(𝐅::AbstractArray)
     # Enforce the rank-2 constraint.
     U,S,V = svd(𝐅)
     S[end] = 0.0
-    𝐅 = U*diagm(S)*V'
+    𝐅 = U*Matrix(Diagonal(S))*V'
 end
 
 # Construct a parameter vector consisting of a projection matrix and 3D points
 function pack(entity::FundamentalMatrix, 𝐏₂::AbstractArray, 𝒳::AbstractArray, )
     N = length(𝒳)
-    𝛉 = Vector{Float64}(12+N*3)
+    𝛉 = Vector{Float64}(undef,12+N*3)
     𝛉[1:12] = Array(𝐏₂[:])
     i = 13
     for n = 1:N

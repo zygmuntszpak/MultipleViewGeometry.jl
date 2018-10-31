@@ -51,7 +51,7 @@ function rodrigues2matrix(vˣ::Real,vʸ::Real,vᶻ::Real)
       𝐯 = [vˣ, vʸ, vᶻ]
       θ = norm(𝐯)
       𝐯 = θ == 0 ? 𝐯 : 𝐯/θ
-      𝐈 = eye(3)
+      𝐈 = Matrix(1.0I, 3, 3)
       𝐖 = vec2antisym(𝐯)
       𝐑 = 𝐈 + 𝐖 * sin(θ) + 𝐖^2 * (1-cos(θ))
 end

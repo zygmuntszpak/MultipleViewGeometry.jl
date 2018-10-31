@@ -1,4 +1,4 @@
-using MultipleViewGeometry, Base.Test
+using MultipleViewGeometry, Test, LinearAlgebra
 using MultipleViewGeometry.ModuleTypes
 using StaticArrays, Calculus
 # Tests for fundamental matrix estimation
@@ -8,13 +8,13 @@ using StaticArrays, Calculus
                         for x=-100:5:100 for y=-100:5:100 for z=1:-50:-100]
 𝒳 = 𝒳[1:50:end]
 # Intrinsic and extrinsic parameters of camera one.
-𝐊₁ = eye(3)
-𝐑₁ = eye(3)
+𝐊₁ = Matrix{Float64}(I,3,3)
+𝐑₁ = Matrix{Float64}(I,3,3)
 𝐭₁ = [0.0, 0.0, 0.0]
 
 # Intrinsic and extrinsic parameters of camera two.
-𝐊₂ = eye(3)
-𝐑₂ = eye(3)
+𝐊₂ = Matrix{Float64}(I,3,3)
+𝐑₂ = Matrix{Float64}(I,3,3)
 𝐭₂ = [100.0, 2.0, -100.0]
 
 # Camera projection matrices.
@@ -50,8 +50,8 @@ end
 @test isapprox(sum(residual), 0.0; atol = 1e-7)
 
 # Test the Fundamental Numerical Scheme on the Fundamental matrix problem.
-Λ₁ =  [SMatrix{3,3}(diagm([1.0,1.0,0.0])) for i = 1:length(ℳ)]sum(residual)
-Λ₂ =  [SMatrix{3,3}(diagm([1.0,1.0,0.0])) for i = 1:length(ℳ)]
+Λ₁ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]sum(residual)
+Λ₂ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
 𝐅₀ = estimate(FundamentalMatrix(),DirectLinearTransform(),  (ℳ, ℳʹ))
 𝐅 = estimate(FundamentalMatrix(),
                         FundamentalNumericalScheme(reshape(𝐅₀,9,1), 5, 1e-10),

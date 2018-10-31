@@ -1,5 +1,5 @@
-using MultipleViewGeometry, Base.Test
-using StaticArrays
+using MultipleViewGeometry, Test
+using StaticArrays, LinearAlgebra
 
 # Tests for a set of two-dimensional Cartesian points represented by homogeneous
 # coordinates.

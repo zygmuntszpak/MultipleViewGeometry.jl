@@ -1,7 +1,7 @@
 __precompile__()
 module MultipleViewGeometry
 
-using Compat
+#using Compat
 using StaticArrays
 
 

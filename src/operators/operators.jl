@@ -55,7 +55,7 @@ end
 function ∂hom⁻¹(𝐧::SVector)
     k = length(𝐧)
     𝐞ₖ = push(zeros(SVector{k-1}),1.0)
-    𝐈 = @SMatrix eye(k)
+    𝐈 = SMatrix{3,3}(1.0I)
     1/𝐧[k]*𝐈 - 1/𝐧[k]^2 * 𝐧 * 𝐞ₖ'
 end
 
@@ -63,14 +63,14 @@ function ∂𝑛(𝐧::AbstractArray)
     k = length(𝐧)
     𝐞ₖ = fill(0.0,(k,1))
     𝐞ₖ[k] = 1
-    1/𝐧[k]*eye(k) - 1/𝐧[k]^2 * 𝐧 * 𝐞ₖ'
+    1/𝐧[k]*Matrix{Float64}(I, k, k) - 1/𝐧[k]^2 * 𝐧 * 𝐞ₖ'
 end
 
 
 function smallest_eigenpair(A::AbstractArray)
-    F = eigfact(A)
-    index = indmin(F[:values])
-    (F[:values][index], F[:vectors][:,index])
+    F = eigen(A)
+    index = argmin(F.values)
+    (F.values[index], F.vectors[:,index])
 end
 
 function smallest_eigenpair(A::AbstractArray,B::AbstractArray)

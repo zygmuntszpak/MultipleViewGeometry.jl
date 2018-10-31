@@ -2,7 +2,7 @@ module ModuleEstimation
 using MultipleViewGeometry.ModuleTypes, MultipleViewGeometry.ModuleDataNormalization, MultipleViewGeometry.ModuleOperators, MultipleViewGeometry.ModuleMathAliases
 using MultipleViewGeometry.ModuleMoments, MultipleViewGeometry.ModuleCarriers, MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTransform, MultipleViewGeometry
-using StaticArrays
+using StaticArrays, LinearAlgebra
 using Juno
 using LsqFit
 export estimate
