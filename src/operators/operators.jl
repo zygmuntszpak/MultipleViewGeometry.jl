@@ -45,7 +45,11 @@ function 𝑛(v::SVector)
 end
 
 function hom⁻¹(v::SVector)
-    pop(v / v[end])
+    if isapprox(v[end], 0.0; atol = 1e-14)
+        pop(v)
+    else
+        pop(v / v[end])
+    end
 end
 
 function hom(v::SVector)

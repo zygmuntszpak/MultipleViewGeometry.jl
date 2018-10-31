@@ -14,7 +14,7 @@ function construct( e::FundamentalMatrix,
         throw(ArgumentError("Expect length-3 translation vectors."))
     end
     𝐅 = vec2antisym(𝐊₂*𝐑₂*(𝐭₁ .- 𝐭₂))*𝐊₂*𝐑₂/𝐑₁/𝐊₁
-    MMatrix{3,3,Float64,3*3}(𝐅)
+    SMatrix{3,3,Float64,3*3}(𝐅)
 end
 
 function construct( e::FundamentalMatrix, 𝐏₁::AbstractArray, 𝐏₂::AbstractArray)
@@ -24,5 +24,5 @@ function construct( e::FundamentalMatrix, 𝐏₁::AbstractArray, 𝐏₂::Abstr
     𝐜₁ = SVector{4,Float64}(nullspace(Array(𝐏₁)))
     𝐞₂ = 𝐏₂*𝐜₁
     𝐅 = vec2antisym(𝐞₂)*𝐏₂*pinv(Array(𝐏₁))
-    MMatrix{3,3,Float64,3*3}(𝐅)
+    SMatrix{3,3,Float64,3*3}(𝐅)
 end

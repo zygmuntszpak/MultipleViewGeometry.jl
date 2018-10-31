@@ -12,8 +12,8 @@ function cost(c::CostFunction, entity::FundamentalMatrix, 𝛉::AbstractArray, �
     @inbounds for n = 1:N
         𝚲ₙ[1:2,1:2] .=  Λ₁[n][index,index]
         𝚲ₙ[3:4,3:4] .=  Λ₂[n][index,index]
-        𝐦 = ℳ[n]
-        𝐦ʹ= ℳʹ[n]
+        𝐦 = hom(ℳ[n])
+        𝐦ʹ= hom(ℳʹ[n])
         𝐔ₙ = (𝐦 ⊗ 𝐦ʹ)
         ∂ₓ𝐮ₙ =  [(𝐞₁ ⊗ 𝐦ʹ) (𝐞₂ ⊗ 𝐦ʹ) (𝐦 ⊗ 𝐞₁) (𝐦 ⊗ 𝐞₂)]
         𝐁ₙ =  ∂ₓ𝐮ₙ * 𝚲ₙ * ∂ₓ𝐮ₙ'
@@ -229,9 +229,9 @@ end
 
 function _X(c::CostFunction, entity::ProjectiveEntity, 𝛉::AbstractArray,𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
     l = length(𝛉)
-    𝐈ₗ = Matrix{Float64}(I,l,l)
-    𝐍 = fill(0.0,(l,l))
-    𝐌 = fill(0.0,(l,l))
+    𝐈ₗ = SMatrix{l,l}(1.0I)
+    𝐍 = @SMatrix zeros(l,l)
+    𝐌 = @SMatrix zeros(l,l)
     N = length(𝒟[1])
     ℳ, ℳʹ = 𝒟
     Λ₁, Λ₂ = 𝒞
@@ -242,8 +242,8 @@ function _X(c::CostFunction, entity::ProjectiveEntity, 𝛉::AbstractArray,𝒞:
         index = SVector(1,2)
         𝚲ₙ[1:2,1:2] .=  Λ₁[n][index,index]
         𝚲ₙ[3:4,3:4] .=  Λ₂[n][index,index]
-        𝐦 = ℳ[n]
-        𝐦ʹ= ℳʹ[n]
+        𝐦 = hom(ℳ[n])
+        𝐦ʹ= hom(ℳʹ[n])
         𝐔ₙ = (𝐦 ⊗ 𝐦ʹ)
         ∂ₓ𝐮ₙ =  [(𝐞₁ ⊗ 𝐦ʹ) (𝐞₂ ⊗ 𝐦ʹ) (𝐦 ⊗ 𝐞₁) (𝐦 ⊗ 𝐞₂)]
         𝐁ₙ =  ∂ₓ𝐮ₙ * 𝚲ₙ * ∂ₓ𝐮ₙ'
@@ -285,50 +285,50 @@ end
 
 function T(c::CostFunction, entity::ProjectiveEntity, 𝛉::AbstractArray, 𝒞::Tuple{AbstractArray, Vararg{AbstractArray}}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
     l = length(𝛉)
-    𝐈ₗ = Matrix{Float64}(I, l, l)
-    𝐈ₘ = Iₘ(entity)
-    𝐍 = fill(0.0,(l,l))
-    𝐌 = fill(0.0,(l,l))
-    𝐓 = fill(0.0,(l,l))
+    𝐈ₗ = SMatrix{l,l}(1.0I)
+    𝐈ₘ =  Iₘ(entity)
+    𝐍 = @SMatrix zeros(l,l)
+    𝐌 = @SMatrix zeros(l,l)
+    𝐓 = @SMatrix zeros(l,l)
     N = length(𝒟[1])
     ℳ, ℳʹ = 𝒟
     Λ₁, Λ₂ = 𝒞
     𝚲ₙ = @MMatrix zeros(4,4)
     𝐞₁ = @SMatrix [1.0; 0.0; 0.0]
     𝐞₂ = @SMatrix [0.0; 1.0; 0.0]
-    for n = 1:N
+    for n = 1: N
         index = SVector(1,2)
         𝚲ₙ[1:2,1:2] .=  Λ₁[n][index,index]
         𝚲ₙ[3:4,3:4] .=  Λ₂[n][index,index]
-        𝐦 = ℳ[n]
-        𝐦ʹ= ℳʹ[n]
+        𝐦 = hom(ℳ[n])
+        𝐦ʹ= hom(ℳʹ[n])
         𝐔ₙ = (𝐦 ⊗ 𝐦ʹ)
         ∂ₓ𝐮ₙ =  [(𝐞₁ ⊗ 𝐦ʹ) (𝐞₂ ⊗ 𝐦ʹ) (𝐦 ⊗ 𝐞₁) (𝐦 ⊗ 𝐞₂)]
-        𝐁ₙ =  ∂ₓ𝐮ₙ * 𝚲ₙ * ∂ₓ𝐮ₙ'
+        𝐁ₙ = ∂ₓ𝐮ₙ * 𝚲ₙ * ∂ₓ𝐮ₙ'
         𝚺ₙ = 𝛉' * 𝐁ₙ * 𝛉
         𝚺ₙ⁻¹ = inv(𝚺ₙ)
-        𝐓₁ = fill(0.0,(l,l))
-        𝐓₂ = fill(0.0,(l,l))
-        𝐓₃ = fill(0.0,(l,l))
-        𝐓₄ = fill(0.0,(l,l))
-        𝐓₅ = fill(0.0,(l,l))
+        𝐓₁ = @SMatrix zeros(Float64,l,l)
+        𝐓₂ = @SMatrix zeros(Float64,l,l)
+        𝐓₃ = @SMatrix zeros(Float64,l,l)
+        𝐓₄ = @SMatrix zeros(Float64,l,l)
+        𝐓₅ = @SMatrix zeros(Float64,l,l)
+        # The additional parentheses around some of the terms are needed as
+        # a workaround to a bug where Base.afoldl allocates memory unnecessarily.
+        # https://github.com/JuliaArrays/StaticArrays.jl/issues/537
         for k = 1:l
-            𝐞ₖ = fill(0.0,(l,1))
-            𝐞ₖ[k] = 1
+            𝐞ₖ = 𝐈ₗ[:,k]
             ∂𝐞ₖ𝚺ₙ = (𝐈ₘ ⊗ 𝐞ₖ') * 𝐁ₙ * (𝐈ₘ ⊗ 𝛉) + (𝐈ₘ ⊗ 𝛉') * 𝐁ₙ * (𝐈ₘ ⊗ 𝐞ₖ)
-            𝐓₁ = 𝐓₁ + 𝐔ₙ * 𝚺ₙ⁻¹ * (∂𝐞ₖ𝚺ₙ) * 𝚺ₙ⁻¹ * 𝐔ₙ' * 𝛉 * 𝐞ₖ'
+            𝐓₁ = 𝐓₁ + (((𝐔ₙ * 𝚺ₙ⁻¹) * (∂𝐞ₖ𝚺ₙ)) * 𝚺ₙ⁻¹) * 𝐔ₙ' * 𝛉 * 𝐞ₖ'
             𝐓₂ = 𝐓₂ + (𝐞ₖ' * 𝐔ₙ * 𝚺ₙ⁻¹ ⊗ 𝐈ₗ) * 𝐁ₙ * (𝚺ₙ⁻¹ * 𝐔ₙ' * 𝛉 ⊗ 𝐈ₗ) * 𝛉 * 𝐞ₖ'
             𝐓₄ = 𝐓₄ + (𝛉' * 𝐔ₙ * 𝚺ₙ⁻¹ * (∂𝐞ₖ𝚺ₙ) * 𝚺ₙ⁻¹ ⊗ 𝐈ₗ) * 𝐁ₙ * (𝚺ₙ⁻¹ * 𝐔ₙ' * 𝛉 ⊗ 𝐈ₗ) * 𝛉 * 𝐞ₖ'
             𝐓₅ = 𝐓₅ + (𝛉' * 𝐔ₙ * 𝚺ₙ⁻¹ ⊗ 𝐈ₗ) * 𝐁ₙ * (𝚺ₙ⁻¹ * (∂𝐞ₖ𝚺ₙ) * 𝚺ₙ⁻¹ * 𝐔ₙ' * 𝛉 ⊗ 𝐈ₗ) * 𝛉 * 𝐞ₖ'
         end
         𝐓₃ =  (𝛉' * 𝐔ₙ * 𝚺ₙ⁻¹ ⊗ 𝐈ₗ) * 𝐁ₙ * (𝐈ₘ ⊗ 𝛉) * 𝚺ₙ⁻¹ * 𝐔ₙ'
         𝐓 = 𝐓 + 𝐓₁ + 𝐓₂ + 𝐓₃ - 𝐓₄ - 𝐓₅
-
     end
     𝐓
 end
 
-
 @inline function Iₘ(entity::FundamentalMatrix)
-     Matrix{Float64}(I, 1, 1)
+     SMatrix{1,1}(1.0I)
 end

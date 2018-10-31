@@ -7,8 +7,8 @@ function moments(entity::FundamentalMatrix, 𝒟::Tuple{AbstractArray, Vararg{Ab
     end
     𝐀 =  @SMatrix zeros(9,9)
     for n = 1:N
-        𝐦  = 𝑛(ℳ[n])
-        𝐦ʹ = 𝑛(ℳʹ[n])
+        𝐦  = hom(ℳ[n])
+        𝐦ʹ = hom(ℳʹ[n])
         𝐀 = 𝐀 + (𝐦*𝐦') ⊗ (𝐦ʹ*𝐦ʹ')
     end
     𝐀/N

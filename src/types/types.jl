@@ -14,8 +14,11 @@
 #const Point2DH = MMatrix{3,1,Float64,3}
 #const Point3DH = MMatrix{4,1,Float64,4}
 
-const Point2DH = MVector{3,Float64}
-const Point3DH = MVector{4,Float64}
+const Point2DH = SVector{3,Float64}
+const Point3DH = SVector{4,Float64}
+
+const Point2D = SVector{2,Float64}
+const Point3D = SVector{3,Float64}
 
 # mutable struct Point2DH <: MMatrix{3,1,Float64,3}
 #     x::Float64
@@ -71,15 +74,15 @@ end
 mutable struct DirectLinearTransform <: EstimationAlgorithm
 end
 
-mutable struct BundleAdjustment <: EstimationAlgorithm
-    𝛉₀::Matrix{Float64}
-    max_iter::Int8
+mutable struct BundleAdjustment{A<:AbstractVector} <: EstimationAlgorithm
+    𝛉₀::A
+    max_iter::Int64
     toleranceθ::Float64
 end
 
-mutable struct FundamentalNumericalScheme <: EstimationAlgorithm
-    𝛉₀::Matrix{Float64}
-    max_iter::Int8
+mutable struct FundamentalNumericalScheme{A<:AbstractVector} <: EstimationAlgorithm
+    𝛉₀::A
+    max_iter::Int64
     toleranceθ::Float64
 end
 

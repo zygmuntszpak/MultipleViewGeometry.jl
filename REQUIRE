@@ -1,7 +1,6 @@
 julia 0.7
-StaticArrays
+StaticArrays 0.8.3
 Juno
-Plots
 LsqFit
 LinearAlgebra
 BenchmarkTools

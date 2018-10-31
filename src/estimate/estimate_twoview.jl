@@ -10,7 +10,7 @@ function estimate(entity::FundamentalMatrix, method::DirectLinearTransform, 𝒟
     λ, f = smallest_eigenpair(Symmetric(𝐀))
     𝐅 = reshape(f,(3,3))
     𝐅 = enforce_ranktwo!(Array(𝐅))
-    𝐅 = 𝐅 / norm(𝐅)
+    𝐅 = SMatrix{3,3,Float64,9}(𝐅 / norm(𝐅))
     # Transform estimate back to the original (unnormalised) coordinate system.
     𝐓ʹ'*𝐅*𝐓
 end
@@ -58,6 +58,7 @@ function estimate(entity::FundamentalMatrix, method::FundamentalNumericalScheme,
     end
     𝐅 = reshape(𝛉,(3,3))
     𝐅 = enforce_ranktwo!(Array(𝐅))
+    𝐅 = SMatrix{3,3,Float64,9}(𝐅)
     # Transform estimate back to the original (unnormalised) coordinate system.
     𝐅 = 𝐓ʹ'*𝐅*𝐓
 end
@@ -68,7 +69,7 @@ function estimate(entity::FundamentalMatrix, method::BundleAdjustment,  𝒟::Tu
     if (N != length(ℳʹ))
           throw(ArgumentError("There should be an equal number of points for each view."))
     end
-    𝐅 = reshape(method.𝛉₀,(3,3))
+    𝐅 = SMatrix{3,3,Float64,9}(reshape(method.𝛉₀,(3,3)))
     𝒳 = triangulate(DirectLinearTransform(),𝐅,(ℳ,ℳʹ))
 
     𝐏₁, 𝐏₂ = construct(ProjectionMatrix(),𝐅)

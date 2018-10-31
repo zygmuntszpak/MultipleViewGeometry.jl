@@ -4,7 +4,7 @@ using StaticArrays, Calculus
 # Tests for fundamental matrix estimation
 
 
-𝒳 = [Point3DH(x,y,z,1.0)
+𝒳 = [Point3D(x,y,z)
                         for x=-100:5:100 for y=-100:5:100 for z=1:-50:-100]
 𝒳 = 𝒳[1:50:end]
 # Intrinsic and extrinsic parameters of camera one.
@@ -42,19 +42,19 @@ npts = length(ℳ)
 residual = zeros(Float64,npts,1)
 for correspondence in zip(1:length(ℳ),ℳ, ℳʹ)
     i, m , mʹ = correspondence
-    𝐦  = 𝑛(m)
-    𝐦ʹ = 𝑛(mʹ)
+    𝐦  = hom(m)
+    𝐦ʹ = hom(mʹ)
     residual[i] = (𝐦ʹ'*𝐅*𝐦)
 end
 
 @test isapprox(sum(residual), 0.0; atol = 1e-7)
 
 # Test the Fundamental Numerical Scheme on the Fundamental matrix problem.
-Λ₁ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]sum(residual)
+Λ₁ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
 Λ₂ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
 𝐅₀ = estimate(FundamentalMatrix(),DirectLinearTransform(),  (ℳ, ℳʹ))
 𝐅 = estimate(FundamentalMatrix(),
-                        FundamentalNumericalScheme(reshape(𝐅₀,9,1), 5, 1e-10),
+                        FundamentalNumericalScheme(vec(𝐅₀), 5, 1e-10),
                                                           (Λ₁,Λ₂), (ℳ, ℳʹ))
 
 𝐅ₜ = construct(FundamentalMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂)
@@ -83,7 +83,7 @@ end
 
 # Test the Bundle Adjustment estimator on the Fundamental matrix problem.
 𝐅, lsqFit = estimate(FundamentalMatrix(),
-                        BundleAdjustment(reshape(𝐅₀,9,1), 5, 1e-10),
+                        BundleAdjustment(vec(𝐅₀), 5, 1e-10),
                                                            (ℳ, ℳʹ))
 𝐅 = 𝐅 / norm(𝐅)
 𝐅 = 𝐅 / sign(𝐅[1,2])

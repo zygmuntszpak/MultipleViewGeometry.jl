@@ -14,8 +14,8 @@ function satisfy(entity::FundamentalMatrix, constraint::EpipolarConstraint, 𝐅
 
     I = 10
     for n = 1:N
-        𝐦 = ℳ[n]
-        𝐦ʹ = ℳʹ[n]
+        𝐦 = hom(ℳ[n])
+        𝐦ʹ = hom(ℳʹ[n])
         𝐦ₕ = init_correction_view_1(𝐅, 𝐦, 𝐦ʹ, 𝐏₂)
         𝐦ₕʹ= init_correction_view_2(𝐅, 𝐦, 𝐦ʹ, 𝐏₂)
         for i = 1:I
@@ -24,8 +24,8 @@ function satisfy(entity::FundamentalMatrix, constraint::EpipolarConstraint, 𝐅
             𝐦ₕ = update_correction_view_1(𝐅, 𝐦, 𝐦ₕ, 𝐦ₜ, 𝐦ʹ, 𝐦ₕʹ, 𝐦ₜʹ, 𝐏₂)
             𝐦ₕʹ = update_correction_view_2(𝐅, 𝐦, 𝐦ₕ, 𝐦ₜ, 𝐦ʹ, 𝐦ₕʹ, 𝐦ₜʹ, 𝐏₂)
         end
-        𝒪[n] = 𝐦ₕ
-        𝒪ʹ[n] = 𝐦ₕʹ
+        𝒪[n] = hom⁻¹(𝐦ₕ)
+        𝒪ʹ[n] = hom⁻¹(𝐦ₕʹ)
     end
     𝒪 ,𝒪ʹ
 end

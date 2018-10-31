@@ -8,7 +8,7 @@ using MultipleViewGeometry.ModuleTypes
 @test construct(ProjectionMatrix(),𝐊,𝐑,𝐭) == [Matrix{Float64}(I, 3, 3) -ones(3)]
 
 # 1. Construct a Fundamental matrix from Camera matrices.
-# 2. Construct projection matrices from the Fundamental matrix.
+# 2. Construct Projection matrices from the Fundamental matrix.
 # 3. Construct a Fundamental matrix from the projection matrices.
 # 4. The Fundamental matrices in step 2 and 3 should be equivalent up to sign
 #    and scale.

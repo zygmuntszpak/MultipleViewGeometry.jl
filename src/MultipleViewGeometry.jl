@@ -16,7 +16,7 @@ export CostFunction, ApproximateMaximumLikelihood, AML
 export HomogeneousCoordinates
 export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
 export CovarianceMatrices
-export Point2DH, Point3DH
+export Point2D, Point2DH, Point3D, Point3DH
 export HessianApproximation, CanonicalApproximation, CovarianceEstimationScheme
 export NoiseModel, GaussianNoise
 
@@ -81,7 +81,7 @@ include("moments/ModuleMoments.jl")
 include("cost_function/ModuleCostFunction.jl")
 include("estimate/ModuleEstimation.jl")
 include("construct/ModuleConstruct.jl")
-include("draw/ModuleDraw.jl")
+#include("draw/ModuleDraw.jl")
 include("constraints/ModuleConstraints.jl")
 include("triangulation/ModuleTriangulation.jl")
 include("noise/ModuleNoise.jl")
@@ -98,7 +98,7 @@ using .ModuleEstimation
 using .ModuleMoments
 using .ModuleCostFunction
 using .ModuleConstruct
-using .ModuleDraw
+#using .ModuleDraw
 using .ModuleConstraints
 using .ModuleTriangulation
 using .ModuleNoise

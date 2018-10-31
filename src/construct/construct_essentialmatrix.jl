@@ -7,5 +7,5 @@ function construct( e::EssentialMatrix, 𝐅::AbstractArray,  𝐊₁::AbstractA
     end
     # Equation 9.12 Chapter 9 from Hartley & Zisserman
     𝐄 = 𝐊₂'*𝐅*𝐊₁
-    MMatrix{3,3,Float64,3*3}(𝐄)
+    SMatrix{3,3,Float64,3*3}(𝐄)
 end
