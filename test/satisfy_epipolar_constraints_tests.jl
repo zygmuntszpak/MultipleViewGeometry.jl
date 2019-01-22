@@ -2,7 +2,6 @@ using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
 using MultipleViewGeometry.ModuleConstraints
-using BenchmarkTools
 using StaticArrays, Random, LinearAlgebra
 
 # Fix random seed.

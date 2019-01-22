@@ -86,16 +86,7 @@ function estimate(entity::FundamentalMatrix, method::BundleAdjustment,  𝒟::Tu
         pts[index₁,n] = ℳ[n][index₁]
         pts[index₂,n] = ℳʹ[n][index₁]
     end
-
-
-    #fit = curve_fit(model_fundamental, jacobian_model, 𝐏₁, reinterpret(Float64,pts,(4*N,1)), 𝛉; show_trace = false)
-    #fit = curve_fit(model_fundamental, jacobian_model, 𝐏₁, temp, 𝛉; show_trace = false)
     fit = curve_fit(model_fundamental, jacobian_model,  𝐏₁, reshape(reinterpret(Float64,vec(pts)),(4*N,)) , 𝛉; show_trace = false)
-    #reshape(reinterpret(T, vec(a)), dims)
-    #reinterpret(::Type{T}, a::Array{S}, dims::NTuple{N, Int}) where {T, S, N}
-    #@show typeof(reshape(reinterpret(Float64,vec(pts)),(4*N,)))
-    #@show typeof(reinterpret(Float64,pts,(4*N,)))
-    #fit = curve_fit(model_fundamental, jacobian_model, 𝐏₁, reshape(reinterpret(Float64,pts),(4*N,)), 𝛉; show_trace = false)
     𝐏₂ = reshape(fit.param[1:12],(3,4))
     𝐅 = construct(FundamentalMatrix(), 𝐏₁, 𝐏₂)
     𝐅, fit
@@ -138,7 +129,7 @@ function jacobian_model(𝐏₁,𝛉)
     𝐈₃ = SMatrix{3,3}(1.0I)
     i = 13
     for n = 1:N
-        # Extract 3D point and convert to homogeneous coordinates
+        # Extract 3D point and convert to homogeneous coordinates.
         𝐌 = hom(SVector{3,Float64}(𝛉[i:i+2]))
 
         # Derivative of residual in first and second image w.r.t 3D point.
@@ -189,8 +180,8 @@ function enforce_ranktwo!(𝐅::AbstractArray)
     𝐅 = U*Matrix(Diagonal(S))*V'
 end
 
-# Construct a parameter vector consisting of a projection matrix and 3D points
-function pack(entity::FundamentalMatrix, 𝐏₂::AbstractArray, 𝒳::AbstractArray, )
+# Construct a parameter vector consisting of a projection matrix and 3D points.
+function pack(entity::FundamentalMatrix, 𝐏₂::AbstractArray, 𝒳::AbstractArray)
     N = length(𝒳)
     𝛉 = Vector{Float64}(undef,12+N*3)
     𝛉[1:12] = Array(𝐏₂[:])

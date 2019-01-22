@@ -8,7 +8,7 @@ function perturb(noise::GaussianNoise, σ::Real, 𝒟::Tuple{AbstractArray, Vara
         for n = 1:N
             𝐦 = ℳ[n]
             D = length(𝐦)
-            𝐦 .= 𝐦 + push(σ*SVector(randn((D-1,1))...),0.0)
+            ℳ[n] = 𝐦 + SVector(randn((D,1))...) #𝐦 + push(σ*SVector(randn((D-1,1))...),0.0)
         end
     end
     𝓔

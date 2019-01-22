@@ -1,10 +1,7 @@
 __precompile__()
 module MultipleViewGeometry
 
-#using Compat
 using StaticArrays
-
-
 
 # Types exported from `types.jl`
 export HomogeneousPoint, ProjectiveEntity, FundamentalMatrix, ProjectionMatrix

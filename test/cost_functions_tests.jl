@@ -1,7 +1,7 @@
 using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
-using BenchmarkTools, LinearAlgebra
+using LinearAlgebra
 using StaticArrays
 
 # Test for cost functions.

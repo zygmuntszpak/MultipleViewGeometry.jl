@@ -4,8 +4,7 @@ using StaticArrays, Calculus
 # Tests for fundamental matrix estimation
 
 
-𝒳 = [Point3D(x,y,z)
-                        for x=-100:5:100 for y=-100:5:100 for z=1:-50:-100]
+𝒳 = [Point3D(x,y,z) for x = -100:5:100 for y = -100:5:100 for z = 1:-50:-100]
 𝒳 = 𝒳[1:50:end]
 # Intrinsic and extrinsic parameters of camera one.
 𝐊₁ = Matrix{Float64}(I,3,3)
@@ -54,8 +53,8 @@ end
 Λ₂ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
 𝐅₀ = estimate(FundamentalMatrix(),DirectLinearTransform(),  (ℳ, ℳʹ))
 𝐅 = estimate(FundamentalMatrix(),
-                        FundamentalNumericalScheme(vec(𝐅₀), 5, 1e-10),
-                                                          (Λ₁,Λ₂), (ℳ, ℳʹ))
+              FundamentalNumericalScheme(vec(𝐅₀), 5, 1e-10),
+               (Λ₁,Λ₂), (ℳ, ℳʹ))
 
 𝐅ₜ = construct(FundamentalMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂)
 # Ensure the estimated and true matrix have the same scale and sign.
@@ -83,8 +82,8 @@ end
 
 # Test the Bundle Adjustment estimator on the Fundamental matrix problem.
 𝐅, lsqFit = estimate(FundamentalMatrix(),
-                        BundleAdjustment(vec(𝐅₀), 5, 1e-10),
-                                                           (ℳ, ℳʹ))
+                      BundleAdjustment(vec(𝐅₀), 5, 1e-10),
+                        (ℳ, ℳʹ))
 𝐅 = 𝐅 / norm(𝐅)
 𝐅 = 𝐅 / sign(𝐅[1,2])
 @test 𝐅 ≈ 𝐅ₜ
