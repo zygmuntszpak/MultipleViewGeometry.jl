@@ -1,15 +1,14 @@
 using MultipleViewGeometry, Test
 using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
-using BenchmarkTools, LinearAlgebra
+using LinearAlgebra
 using StaticArrays
 
 # Test for cost functions.
 
 # Test cost function on Fundamental matrix estimation.
 
-𝒳 = [Point3DH(x,y,z,1.0)
-                        for x=-1:0.5:10 for y=-1:0.5:10 for z=2:-0.1:1]
+𝒳 = [Point3D(x,y,z) for x=-1:0.5:10 for y=-1:0.5:10 for z=2:-0.1:1]
 
 # Intrinsic and extrinsic parameters of camera one.
 𝐊₁ = SMatrix{3,3}(Matrix{Float64}(I, 3, 3))
@@ -34,7 +33,7 @@ using StaticArrays
 # Ensure the estimated and true matrix have the same scale and sign.
 𝐅 = 𝐅 / norm(𝐅)
 𝐅 = 𝐅 / sign(𝐅[1,3])
-𝐟 = reshape(𝐅,9,1)
+𝐟 = vec(𝐅)
 
 Λ₁ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
 Λ₂ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
@@ -43,14 +42,14 @@ Jₐₘₗ =  cost(AML(),FundamentalMatrix(), SVector{9}(𝐟), (Λ₁,Λ₂), (
 @test isapprox(Jₐₘₗ, 0.0; atol = 1e-14)
 
 # Verify that the vectorised fundamental matrix is in the null space of X
-𝐗 = X(AML(),FundamentalMatrix(), reshape(𝐅,9,1), (Λ₁,Λ₂), (ℳ, ℳʹ))
+𝐗 = X(AML(),FundamentalMatrix(), vec(𝐅), (Λ₁,Λ₂), (ℳ, ℳʹ))
 
 # The true parameters should lie in the null space of the matrix X.
 @test all(isapprox.(𝐗 * 𝐟, 0.0; atol = 1e-10))
 
 # Verify that the the vectorised fundamental matrix is in the null space of H.
 # H represents the Hessian matrix of the AML cost function.
-𝐇 = H(AML(),FundamentalMatrix(), reshape(𝐅,9,1), (Λ₁,Λ₂), (ℳ, ℳʹ))
+𝐇 = H(AML(),FundamentalMatrix(), vec(𝐅), (Λ₁,Λ₂), (ℳ, ℳʹ))
 
 # The true parameters should lie in the null space of the matrix H.
 @test all(isapprox.(𝐇 * 𝐟, 0.0; atol = 1e-10))

@@ -1,11 +1,1 @@
 julia 0.7
-StaticArrays
-Juno
-Plots
-LsqFit
-LinearAlgebra
-BenchmarkTools
-Random
-MAT
-Calculus
-SparseArrays

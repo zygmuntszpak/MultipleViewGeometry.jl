@@ -5,6 +5,6 @@ function project(e::Pinhole, 𝐏::AbstractArray, 𝒳::Vector{<:AbstractArray})
         throw(ArgumentError("Expect 3 x 4 projection matrix."))
     end
     ℳ = map(𝒳) do 𝐗
-        𝐦 = 𝑛(Point2DH(𝐏 * 𝐗))
+        𝐦 = hom⁻¹(𝐏 * hom(𝐗))
     end
 end

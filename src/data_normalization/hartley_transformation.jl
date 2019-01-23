@@ -48,26 +48,25 @@ function hartley_transformation(ℳ::Vector{T})::SMatrix where T <:AbstractArray
         throw(ArgumentError("Array cannot be empty."))
     end
     npts = length(ℳ)
-    ndim = length(ℳ[1])-1
+    ndim = length(ℳ[1])
     𝐜 = centroid(ℳ)
     σ = root_mean_square(ℳ, 𝐜)
-    σ⁻¹ = 1 ./ σ
-    𝐓 = SMatrix{ndim+1,ndim+1,Float64, (ndim+1)^2}([σ⁻¹*Matrix{Float64}(I,ndim,ndim) -σ⁻¹*𝐜[1:end-1] ; zeros(1,ndim) 1.0])
+    σ⁻¹ = 1 / σ
+    𝐓 = SMatrix{ndim+1,ndim+1,Float64, (ndim+1)^2}([σ⁻¹*Matrix{Float64}(I,ndim,ndim) -σ⁻¹*𝐜 ; zeros(1,ndim) 1.0])
 end
 
 function centroid(positions::Vector{T}) where T <: AbstractArray
     x = zeros(T)
     for pos ∈ positions
-        x .= (+).(x, pos)
+        x = x + pos
     end
-    x .= (/).(x,length(positions))
-    return x
+    return x / length(positions)
 end
 
 function root_mean_square(ℳ::Vector{T}, 𝐜::T ) where  T <: AbstractArray
     total = 0.0
     npts = length(ℳ)
-    ndim = length(ℳ[1])-1
+    ndim = length(ℳ[1])
     for 𝐦 ∈ ℳ
          total  = total + ∑((𝐦-𝐜).^2)
     end
@@ -126,7 +125,7 @@ end
 function hartley_normalization!(ℳ::Vector{<:AbstractArray})
     𝐓 = hartley_transformation(ℳ)
     map!(ℳ , ℳ) do 𝐦
-         𝐓 * 𝐦
+         hom⁻¹(𝐓 * hom(𝐦))
     end
      ℳ, 𝐓
 end

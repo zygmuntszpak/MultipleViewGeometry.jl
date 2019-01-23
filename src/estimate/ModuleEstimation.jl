@@ -3,7 +3,6 @@ using MultipleViewGeometry.ModuleTypes, MultipleViewGeometry.ModuleDataNormaliza
 using MultipleViewGeometry.ModuleMoments, MultipleViewGeometry.ModuleCarriers, MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTransform, MultipleViewGeometry
 using StaticArrays, LinearAlgebra
-using Juno
 using LsqFit
 export estimate
 include("estimate_twoview.jl")
