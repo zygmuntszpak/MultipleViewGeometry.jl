@@ -20,6 +20,7 @@ using StaticArrays, Calculus
 𝐏₁ = construct(ProjectionMatrix(),𝐊₁,𝐑₁,𝐭₁)
 𝐏₂ = construct(ProjectionMatrix(),𝐊₂,𝐑₂,𝐭₂)
 
+
 # Set of corresponding points.
 ℳ = project(Pinhole(),𝐏₁,𝒳)
 ℳʹ = project(Pinhole(),𝐏₂,𝒳)

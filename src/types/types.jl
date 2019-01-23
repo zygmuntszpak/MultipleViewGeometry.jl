@@ -44,6 +44,8 @@ abstract type CameraModel end
 
 abstract type EstimationAlgorithm end
 
+abstract type FactorisationAlgorithm end
+
 abstract type CostFunction end
 
 abstract type CoordinateSystemTransformation end
@@ -52,8 +54,18 @@ abstract type CovarianceEstimationScheme end
 
 abstract type NoiseModel end
 
+abstract type TotalViews end
+
+abstract type PlanarCoordinateSystem end
+
 
 mutable struct FundamentalMatrix <: ProjectiveEntity
+end
+
+mutable struct HomographyMatrix <: ProjectiveEntity
+end
+
+mutable struct HomographyMatrices <: ProjectiveEntity
 end
 
 mutable struct EssentialMatrix <: ProjectiveEntity
@@ -62,10 +74,63 @@ end
 mutable struct  ProjectionMatrix <: ProjectiveEntity
 end
 
+mutable struct  ProjectionMatrices <: ProjectiveEntity
+    src::ProjectiveEntity
+    method::FactorisationAlgorithm
+    views::TotalViews
+end
+
+mutable struct  LatentVariables <: ProjectiveEntity
+    src::ProjectiveEntity
+end
+
+mutable struct  Chojnacki <: FactorisationAlgorithm
+end
+
 mutable struct  HomogeneousCoordinates <: ProjectiveEntity
 end
 
+struct CartesianSystem <: PlanarCoordinateSystem
+    𝐞₁::Vec{2,Float64}
+    𝐞₂::Vec{2,Float64}
+end
+# Convention I:
+# CartesianSystem() = CartesianSystem(Vec(1.0, 0.0), Vec(0.0, -1.0))
+CartesianSystem() = CartesianSystem(Vec(-1.0, 0.0), Vec(0.0, 1.0))
+
+struct RasterSystem <: PlanarCoordinateSystem
+    𝐞₁::Vec{2,Float64}
+    𝐞₂::Vec{2,Float64}
+end
+#TODO Will have to change this to accomodate different conventions.
+# Convention I:  RasterSystem() = RasterSystem(Vec(1.0, 0.0), Vec(0.0, 1.0))
+RasterSystem() = RasterSystem(Vec(-1.0, 0.0), Vec(0.0, -1.0))
+
+
+
+struct OpticalSystem <: PlanarCoordinateSystem
+    𝐞₁::Vec{2,Float64}
+    𝐞₂::Vec{2,Float64}
+end
+# Convention I: = OpticalSystem(Vec(1.0, 0.0), Vec(0.0, 1.0))
+OpticalSystem() = OpticalSystem(Vec(-1.0, 0.0), Vec(0.0, -1.0))
+
 mutable struct  Pinhole <: CameraModel
+    image_width::Int
+    image_height::Int
+    focal_length::Float64
+    # Center of projection.
+    𝐜::Point{3,Float64}
+    # Basis vectors that characterise the pose of the camera
+    𝐞₁::Vec{3,Float64}
+    𝐞₂::Vec{3,Float64}
+    𝐞₃::Vec{3,Float64}
+    # Origin of the picture plane (the image).
+    𝐨::Point{2,Float64}
+    # Basis vectors that characterise the coordinate system of the
+    # picture plane (the image).
+    𝐞₁′::Vec{2,Float64}
+    𝐞₂′::Vec{2,Float64}
 end
 
 mutable struct  CanonicalLens <: CameraModel
@@ -111,4 +176,7 @@ end
 
 mutable struct GaussianNoise <: NoiseModel
 
+end
+
+mutable struct TwoViews <: TotalViews
 end
