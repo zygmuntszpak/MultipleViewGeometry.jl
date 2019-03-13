@@ -7,5 +7,6 @@ export construct
 
 include("construct_projectionmatrix.jl")
 include("construct_fundamentalmatrix.jl")
+include("construct_homographymatrix.jl")
 include("construct_essentialmatrix.jl")
 end

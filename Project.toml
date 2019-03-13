@@ -4,10 +4,14 @@ authors = ["Dr. Zygmunt L. Szpak <zygmunt.szpak@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+GeometryTypes = "4d00f742-c7ba-57c2-abde-4428a4b178cb"
 Juno = "e5e0dc1b-0480-54bc-9374-aad01c23163d"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LsqFit = "2fda8390-95c7-5789-9bda-21331edee243"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"

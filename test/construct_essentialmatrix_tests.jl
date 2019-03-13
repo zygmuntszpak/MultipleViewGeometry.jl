@@ -1,4 +1,4 @@
-using MultipleViewGeometry, MultipleViewGeometry.ModuleRotation, LinearAlgebra, Test
+using MultipleViewGeometry, MultipleViewGeometry.ModuleMove, LinearAlgebra, Test
 
 # Intrinsic and extrinsic parameters for the first camera.
 𝐊₁ = zeros(3,3)

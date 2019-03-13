@@ -9,11 +9,13 @@ function construct( e::ProjectionMatrix,
     if length(𝐭) != 3
         throw(ArgumentError("Expect length-3 translation vectors."))
     end
-    𝐏 = 𝐊*[𝐑 -𝐑*𝐭]
+    # TODO: Reconcile this change in convention with the rest of the code.
+    #𝐏 = 𝐊*[𝐑 -𝐑*𝐭]
+    𝐏 = 𝐊*[𝐑' -𝐑'*𝐭]
     SMatrix{3,4,Float64,3*4}(𝐏)
 end
 
-function construct( e::ProjectionMatrix, 𝐅::AbstractArray)
+function construct(e::ProjectionMatrix, 𝐅::AbstractArray)
     𝐞 = epipole(𝐅')
     𝐏₁ = Matrix{Float64}(I,3,4)
     𝐏₂ = [vec2antisym(𝐞) * 𝐅  𝐞]
@@ -22,7 +24,7 @@ function construct( e::ProjectionMatrix, 𝐅::AbstractArray)
 
 end
 
-function construct( e::ProjectionMatrix, 𝐄::AbstractArray, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
+function construct(e::ProjectionMatrix, 𝐄::AbstractArray, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
     𝐖 = SMatrix{3,3,Float64,3*3}([0 -1 0; 1 0 0; 0 0 1])
     𝐙 = SMatrix{3,3,Float64,3*3}([0 1 0; -1 0 0; 0 0 0])
     𝐔,𝐒,𝐕 = svd(𝐄)
@@ -71,4 +73,94 @@ function construct( e::ProjectionMatrix, 𝐄::AbstractArray, 𝒟::Tuple{Abstra
     else
         return 𝐏₁,  𝐏₂₄
     end
+end
+
+function construct(e::ProjectionMatrices, ℋ::Tuple{AbstractArray, Vararg{AbstractArray}})
+    construct(LatentVariables(HomographyMatrices()), ℋ)
+end
+
+function construct(lv::LatentVariables, ℋ::Tuple{AbstractArray, Vararg{AbstractArray}})
+        N = length(ℋ)
+        if N < 2
+            throw(ArgumentError("Please supply at least two homography matrices."))
+        end
+        𝐗₁ = ℋ[1]
+        𝛍 = zeros(N)
+        𝐉 = Array{Float64}(undef,(3,(N-1)*6))
+        i₁ = range(1, step = 6, length = N - 1)
+        i₂ = range(6, step = 6, length = N - 1)
+        for n = 2:N
+            𝐗ₙ = ℋ[n]
+            e₁, e₂ = find_nearest_eigenvalues(eigvals(Array(𝐗₁), Array(𝐗ₙ)))
+            𝐘 = hcat(e₁ * 𝐗ₙ - 𝐗₁, e₂ * 𝐗ₙ - 𝐗₁)
+            μ = (e₁ + e₂) / 2
+            𝛍[n] = real(μ)
+            𝐉[:,i₁[n-1]:i₂[n-1]] .= 𝐘
+        end
+        𝛈 = initialisation_procedure(𝐉, 𝛍, ℋ)
+        𝐚  = @view 𝛈[1:9]
+        𝐀 = reshape(𝐚, (3,3))
+        𝐛 = @view 𝛈[10:12]
+        𝐏₁ = SMatrix{3,4}(1.0I)
+        𝐏₂ = SMatrix{3,4}(hcat(𝐀, 𝐛))
+        𝐏₁, 𝐏₂
+end
+
+function initialisation_procedure(𝐉::AbstractArray, 𝛍::AbstractArray, ℋ::Tuple{AbstractArray, Vararg{AbstractArray}})
+    N = length(ℋ)
+    if N < 2
+        throw(ArgumentError("Please supply at least two homography matrices."))
+    end
+    F = svd(𝐉)
+    𝛈 = zeros(9 + 3 + (N*3) + N)
+    𝐛 = real(F.U[:,1])
+    𝐗₁ = ℋ[1]
+    𝐀 = 𝐗₁
+    𝐯₁ = SVector(0,0,0)
+    wₙ = 1
+    # pack 𝛈 = [𝐚,𝐛, 𝐯₁,...,𝐯ₙ, w₁, ..., wₙ]
+    𝛈[1:9] .= vec(𝐀)
+    𝛈[10:12] .= 𝐛
+    for (n,i) in enumerate(range(13, step = 3, length = N))
+        if n == 1
+            𝛈[i:i+2] .= 𝐯₁
+        else
+            𝐗ₙ = ℋ[n]
+            𝛈[i:i+2] .= 𝐯₁ +  (𝛍[n] * 𝐗ₙ - 𝐗₁)' * 𝐛 / (norm(𝐛)^2)
+        end
+    end
+    𝛈[end-(N-1):end] .= wₙ
+    𝛈
+end
+
+function find_nearest_eigenvalues(e::AbstractArray)
+    dist = SVector(abs(e[1]-e[2]), abs(e[1]-e[3]), abs(e[2]-e[3]))
+    minval, index = findmin(dist)
+    if index == 3
+        i₁ = 2
+        i₂ = 3
+    elseif index == 2
+        i₁ = 1
+        i₂ = 3
+    else
+        i₁ = 1
+        i₂ = 2
+    end
+    e[i₁], e[i₂]
+end
+
+function unpack(e::LatentVariables, 𝛈::AbstractArray)
+    N = div(length(𝛈) - 12,  4)
+    𝐚  = @view 𝛈[1:9]
+    𝐀 = reshape(𝐚, (3,3))
+    𝐛 = @view 𝛈[10:12]
+    𝐰 = @view 𝛈[end-(N-1):end]
+    r = range(13, step = 3, length = N+1)
+    @show first(r), last(r), N
+    𝐯 = reshape(view(𝛈,first(r):last(r)-1), (3,N))
+    𝒫 = Array{Array{Float64,2},1}(undef,(N,))
+    for n = 1:N
+        𝒫[n] = 𝐰[n]*𝐀 + 𝐛*𝐯[:,n]'
+    end
+    𝒫
 end
