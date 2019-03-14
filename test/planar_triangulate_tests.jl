@@ -5,99 +5,91 @@ using MultipleViewGeometry.ModuleConstraints
 using MultipleViewGeometry.ModuleConstruct
 using LinearAlgebra
 using StaticArrays
+using GeometryTypes
 
 # Fix random seed.
 Random.seed!(1234)
 # Construct two camera matrices and parametrise two planar surfaces.
-𝐊₁ = Matrix{Float64}(I, 3, 3)
-𝐑₁ = Matrix{Float64}(I, 3, 3)
-𝐭₁ = [-10.0, -55.0, 10.0]
-𝐊₂ = Matrix{Float64}(I, 3, 3)
-#𝐑₂ = Matrix{Float64}(I, 3, 3)
-𝐑₂ = SMatrix{3,3,Float64,9}(rotxyz(pi/10,pi/10,pi/10))
-𝐭₂ = [120.0, 120.0, 20.0]
-𝐧₁ = [1.0, 0.0, 0.0]
-d₁ = 25.0
-𝐧₂ = [0.5, 0.5, 0.0]
-d₂ = 15.0
+f = 50
+image_width = 640 / 10
+image_height = 480 / 10
+𝐊₁ = @SMatrix [f 0 0 ;
+               0 f 0 ;
+               0 0 1 ]
+𝐑₁ = SMatrix{3,3,Float64,9}(rotxyz(0, 25*(pi/180), 0))
+𝐭₁ = [-30.0, 0.0, -5.0]
 
-𝐏₁ = construct(ProjectionMatrix(),𝐊₁,𝐑₁,𝐭₁)
-𝐏₂ = construct(ProjectionMatrix(),𝐊₂,𝐑₂,𝐭₂)
+𝐊₂ = @SMatrix [f 0 0 ;
+               0 f 0 ;
+               0 0 1 ]
 
-# We will construct a pair of homography matrices and then construct a pair of
-# projection matrices from the homographies.
-𝐇₁ = construct(HomographyMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂,𝐧₁,d₁)
-𝐇₂ = construct(HomographyMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂,𝐧₂,d₂)
+𝐑₂ = SMatrix{3,3,Float64,9}(rotxyz(0, -25*(pi/180), 0))
+𝐭₂ = [30.0, 0.0, 5.0]
+
+# Normals and distance from origin
+𝐧₁ = [0.0, 0.0, 1.0]
+d₁ = 55.0
+
+# Normals and distance from origin
+𝐧₁ = [0.0, 0.0, 1.0]
+d₁ = 55.0
+
+𝐧₂ = [0.5, -0.2, 2.0]
+d₂ = 145.0
+
+𝒳₁ = generate_planar_points(𝐧₁,d₁, 20, 50)
+𝒳₂ = generate_planar_points(𝐧₂,d₂, 20, 50)
 
 
-context = ProjectionMatrices(HomographyMatrices(), Chojnacki(), TwoViews())
-𝐎₁, 𝐎₂ = construct(context, (𝐇₁,𝐇₂))
-𝐅 = construct(FundamentalMatrix(), 𝐎₁, 𝐎₂)
+world_basis = (Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(0.0, 0.0, 1.0))
+camera_basis = (Point(0.0, 0.0, 0.0), Vec(-1.0, 0.0, 0.0), Vec(0.0, -1.0, 0.0), Vec(0.0, 0.0, 1.0))
+picture_basis = (Point(0.0, 0.0), Vec(-1.0, 0.0), Vec(0.0, -1.0))
 
-# Set of corresponding points for the first and second plane.
-ℳ₁ = [Point2D(x,y) for x = 0:20:320 for y = 0:15:240]
-ℳ₂ = [Point2D(x,y) for x = 320:20:640 for y = 240:15:480]
+camera₁ = Pinhole(image_width, image_height, f, camera_basis..., picture_basis...)
+camera₂ = Pinhole(image_width, image_height, f, camera_basis..., picture_basis...)
+relocate!(camera₁, 𝐑₁, 𝐭₁)
+relocate!(camera₂, 𝐑₂, 𝐭₂)
 
-ℳ₁ʹ = similar(ℳ₁)
-ℳ₂ʹ = similar(ℳ₂)
-for n = 1:length(ℳ₁)
-    𝐦 = hom(ℳ₁[n])
-    𝐦ʹ = 𝐇₁*𝐦
-    ℳ₁ʹ[n] = hom⁻¹(𝐦ʹ)
-end
+𝐑₁′, 𝐭₁′ = ascertain_pose(camera₁, world_basis... )
+𝐊₁′ = obtain_intrinsics(camera₁, CartesianSystem())
+𝐑₂′, 𝐭₂′ = ascertain_pose(camera₂, world_basis... )
+𝐊₂′ = obtain_intrinsics(camera₂, CartesianSystem())
 
-hom(ℳ₁[2])
-hom⁻¹(𝐇₁*hom(ℳ₁[2]))
+𝐏₁ = construct(ProjectionMatrix(),𝐊₁′,𝐑₁′,𝐭₁′)
+𝐏₂ = construct(ProjectionMatrix(),𝐊₂′,𝐑₂′,𝐭₂′)
 
-for n = 1:length(ℳ₂)
-    𝐦 = hom(ℳ₂[n])
-    𝐦ʹ = 𝐇₂*𝐦
-    ℳ₂ʹ[n] = hom⁻¹(𝐦ʹ)
-end
-
-for n = 1:length(ℳ₁)
-    m₁ = ℳ₁[n]
-    m₁ʹ = ℳ₁ʹ[n]
-    #Base.display(m₁,m₂)
-    @show m₁,m₁ʹ
-end
+# Set of corresponding points.
+ℳ₁ = project(camera₁,𝐏₁,𝒳₁)
+ℳ₁ʹ= project(camera₂,𝐏₂,𝒳₁)
+ℳ₂ = project(camera₁,𝐏₁,𝒳₂)
+ℳ₂ʹ= project(camera₂,𝐏₂,𝒳₂)
 
 # 3D points corresponding to the first and second planar surface
 𝒴₁ = triangulate(DirectLinearTransform(),𝐏₁,𝐏₂,(ℳ₁,ℳ₁ʹ))
 𝒴₂ = triangulate(DirectLinearTransform(),𝐏₁,𝐏₂,(ℳ₂,ℳ₂ʹ))
 
+# Triangulating with the same projection matrices that were used to construct
+# (ℳ,ℳʹ) should yield 3D points that lie on a plane.
 N = length(𝒴₁)
 for n = 1:N
     X = 𝒴₁[n]
-    #@test isapprox(dot(𝐧₁,X) + d₁, 0.0; atol = 1e-12)
-    Base.display(dot(𝐧₁,X) + d₁)
+    @test isapprox(dot(𝐧₁,X) - d₁, 0.0; atol = 1e-11)
+end
+
+N = length(𝒴₂)
+for n = 1:N
+    X = 𝒴₂[n]
+    @test isapprox(dot(𝐧₂,X) - d₂, 0.0; atol = 1e-11)
 end
 
 # Triangulating with the same projection matrices that were used to construct
 # (ℳ,ℳʹ) should yield the same 3D points as the original 𝒳.
-N = length(𝒴)
+N = length(𝒴₁)
 for n = 1:N
-    @test  isapprox(sum(abs.(𝒳[n]-𝒴[n])/3), 0.0; atol = 1e-12)
+    @test  isapprox(sum(abs.(𝒳₁[n]-𝒴₁[n])/3), 0.0; atol = 1e-12)
 end
 
-
-#𝐅 = construct(FundamentalMatrix(),𝐊₁,𝐑₁,𝐭₁,𝐊₂,𝐑₂,𝐭₂)
-
-# To triangulate the corresponding points using the Fundamental matrix, we first
-# have to factorise the Fundamental matrix into a pair of Camera matrices. Due
-# to projective ambiguity, the camera matrices are not unique, and so the
-# triangulated 3D points will most probably not match the original 3D points.
-# However, when working with noiseless data, the projections of the triangulated
-# points should satisfy the epipolar constraint. We can use this fact to
-# validate that the triangulation is correctly implemented.
-𝒴 = triangulate(DirectLinearTransform(),𝐅,(ℳ₁,ℳ₁ʹ))
-
-𝐐₁, 𝐐₂ = construct(ProjectionMatrix(),𝐅)
-𝒪 = project(Pinhole(),𝐐₁,𝒴₁)
-𝒪ʹ= project(Pinhole(),𝐐₂,𝒴₁)
-N = length(𝒪)
+N = length(𝒴₂)
 for n = 1:N
-    𝐦 = hom(𝒪[n])
-    𝐦ʹ = hom(𝒪ʹ[n])
-    @test  isapprox(𝐦'*𝐅*𝐦ʹ, 0.0; atol = 1e-14)
+    @test  isapprox(sum(abs.(𝒳₂[n]-𝒴₂[n])/3), 0.0; atol = 1e-12)
 end
