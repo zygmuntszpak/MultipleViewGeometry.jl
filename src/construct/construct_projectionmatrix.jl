@@ -10,7 +10,6 @@ function construct( e::ProjectionMatrix,
         throw(ArgumentError("Expect length-3 translation vectors."))
     end
     # TODO: Reconcile this change in convention with the rest of the code.
-    #𝐏 = 𝐊*[𝐑 -𝐑*𝐭]
     𝐏 = 𝐊*[𝐑' -𝐑'*𝐭]
     SMatrix{3,4,Float64,3*4}(𝐏)
 end

@@ -61,6 +61,9 @@ export rotate!, translate!, relocate!
 # Functions exported from `cost_functions.jl`
 export cost, X, covariance_matrix, covariance_matrix_debug
 
+# Functions exported from "synthetic_data.jl"
+export generate_planar_points
+
 # Functions exported from `draw.jl`
 #export draw!, EpipolarLineGraphic, LineSegment3D, PlaneSegment3D, Camera3D
 #export WorldCoordinateSystem3D
@@ -80,6 +83,7 @@ include("math_aliases/ModuleMathAliases.jl")
 include("types/ModuleTypes.jl")
 include("operators/ModuleOperators.jl")
 #include("rotation/ModuleRotation.jl")
+include("synthetic_data/ModuleSyntheticData.jl")
 include("camera/ModuleCamera.jl")
 include("move/ModuleMove.jl")
 include("data_normalization/ModuleDataNormalization.jl")
@@ -99,6 +103,7 @@ using .ModuleMathAliases
 using .ModuleTypes
 using .ModuleOperators
 #using .ModuleRotation
+using .ModuleSyntheticData
 using .ModuleCamera
 using .ModuleMove
 using .ModuleDataNormalization

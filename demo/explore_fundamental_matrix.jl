@@ -1,13 +1,19 @@
-using MultipleViewGeometry, Test, LinearAlgebra
+using Makie
+using MultipleViewGeometry, Test, Random
+using MultipleViewGeometry.ModuleCostFunction
 using MultipleViewGeometry.ModuleTypes
-using StaticArrays, Calculus, GeometryTypes
+using MultipleViewGeometry.ModuleConstraints
+using MultipleViewGeometry.ModuleConstruct
+using MultipleViewGeometry.ModuleDraw
 using MultipleViewGeometry.ModuleMove
-
-# Tests for fundamental matrix estimation
+using LinearAlgebra
+using StaticArrays
+using GeometryTypes
+using Test
 
 𝒳 = [Point3D(x,y,rand(50:100)) for x = -100:5:100 for y = -100:5:100]
 𝒳 = 𝒳[1:50:end]
-
+X = reshape(reinterpret(Float64,𝒳),(3,length(𝒳)))
 
 # Specify the coordinate systems of the world, the camera frame and the picture
 # plane.
@@ -32,6 +38,24 @@ relocate!(camera₁, 𝐑₁, 𝐭₁)
 𝐑₂ = Matrix{Float64}(I,3,3)
 𝐭₂ = [50.0, 2.0, 0.0]
 relocate!(camera₂, 𝐑₂, 𝐭₂)
+
+
+scale = 20.0f0
+x = Vec3f0(0); baselen = 0.2f0 * scale ; dirlen = 1f0 * scale
+# create an array of differently colored boxes in the direction of the 3 axes
+rectangles = [
+    (HyperRectangle(Vec3f0(x), Vec3f0(dirlen, baselen, baselen)), RGBAf0(1,0,0,1)),
+    (HyperRectangle(Vec3f0(x), Vec3f0(baselen, dirlen, baselen)), RGBAf0(0,1,0,1)),
+    (HyperRectangle(Vec3f0(x), Vec3f0(baselen, baselen, dirlen)), RGBAf0(0,0,1,1))
+]
+meshes = map(GLNormalMesh, rectangles)
+
+
+scene = mesh(merge(meshes))
+scatter!(scene, X[1,:],X[2,:], X[3,:], markersize = 3, color = :red)
+draw!(camera₁, scene)
+draw!(camera₂, scene)
+
 
 
 𝐑₁′, 𝐭₁′ = ascertain_pose(camera₁, world_basis... )
