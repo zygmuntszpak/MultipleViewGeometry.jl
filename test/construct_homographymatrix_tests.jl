@@ -1,5 +1,6 @@
 using MultipleViewGeometry, Test, LinearAlgebra
 
+#TODO Revisit this convention.
 # In the case of calibrated cameras one can assume that
 # 𝐊₁ = 𝐊₂ = 𝐈, 𝐭₁ = [0,0,0],  𝐑₁ = 𝐈 ,  𝐑₂ = 𝐑 and 𝐭 = -𝐑𝐭₂ so that the
 # direct nRt representation 𝐇 = -d𝐑 + 𝐭𝐧' holds.

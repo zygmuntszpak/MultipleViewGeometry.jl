@@ -78,10 +78,13 @@ end
 # Test the Fundamental Numerical Scheme on the Fundamental matrix problem.
 Λ₁ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
 Λ₂ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ)]
-𝐅₀ = estimate(FundamentalMatrix(),DirectLinearTransform(),  (ℳ, ℳʹ))
+𝐅₀ = estimate(FundamentalMatrix(), DirectLinearTransform(),  (ℳ, ℳʹ))
+# 𝐅 = estimate(FundamentalMatrix(),
+#               FundamentalNumericalScheme(vec(𝐅₀), 5, 1e-10),
+#                (Λ₁,Λ₂), (ℳ, ℳʹ))
 𝐅 = estimate(FundamentalMatrix(),
-              FundamentalNumericalScheme(vec(𝐅₀), 5, 1e-10),
-               (Λ₁,Λ₂), (ℳ, ℳʹ))
+             FundamentalNumericalScheme(ManualEstimation(𝐅₀), 5, 1e-10),
+             (Λ₁,Λ₂), (ℳ, ℳʹ))
 
 
 # Ensure the estimated and true matrix have the same scale and sign.
@@ -91,9 +94,12 @@ end
 @test 𝐅 ≈ 𝐅ₜ
 
 # Test the Bundle Adjustment estimator on the Fundamental matrix problem.
-𝐅, lsqFit = estimate(FundamentalMatrix(),
-                      BundleAdjustment(vec(𝐅₀), 5, 1e-10),
-                        (ℳ, ℳʹ))
+# 𝐅, lsqFit = estimate(FundamentalMatrix(),
+#                       BundleAdjustment(vec(𝐅₀), 5, 1e-10),
+#                         (ℳ, ℳʹ))
+𝐅 = estimate(FundamentalMatrix(),
+                     BundleAdjustment(ManualEstimation(𝐅₀), 5, 1e-10),
+                     (ℳ, ℳʹ))
 𝐅 = 𝐅 / norm(𝐅)
 𝐅 = 𝐅 / sign(𝐅[3,1])
 @test 𝐅 ≈ 𝐅ₜ

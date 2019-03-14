@@ -2,6 +2,7 @@ module ModuleConstruct
 using MultipleViewGeometry
 using MultipleViewGeometry.ModuleTypes, MultipleViewGeometry.ModuleMathAliases, MultipleViewGeometry.ModuleOperators
 using MultipleViewGeometry.ModuleProjection
+using MultipleViewGeometry.ModuleFactorization
 using StaticArrays, LinearAlgebra
 export construct
 

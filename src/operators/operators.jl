@@ -36,7 +36,7 @@ function 𝑛(v::AbstractArray)
     end
 end
 
-function 𝑛(v::SVector)
+function 𝑛(v::StaticVector)
     if v[end] != 0 && v[end] != 1
         v / v[end]
     else
@@ -44,7 +44,7 @@ function 𝑛(v::SVector)
     end
 end
 
-function hom⁻¹(v::SVector)
+function hom⁻¹(v::StaticVector)
     if isapprox(v[end], 0.0; atol = 1e-14)
         pop(v)
     else
@@ -52,11 +52,11 @@ function hom⁻¹(v::SVector)
     end
 end
 
-function hom(v::SVector)
+function hom(v::StaticVector)
     push(v,1)
 end
 
-function ∂hom⁻¹(𝐧::SVector)
+function ∂hom⁻¹(𝐧::StaticVector)
     k = length(𝐧)
     𝐞ₖ = push(zeros(SVector{k-1}),1.0)
     𝐈 = SMatrix{3,3}(1.0I)

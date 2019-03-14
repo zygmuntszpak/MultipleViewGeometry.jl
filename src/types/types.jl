@@ -65,7 +65,7 @@ end
 mutable struct HomographyMatrix <: ProjectiveEntity
 end
 
-mutable struct HomographyMatrices <: ProjectiveEntity
+struct HomographyMatrices <: ProjectiveEntity
 end
 
 mutable struct EssentialMatrix <: ProjectiveEntity
@@ -74,17 +74,17 @@ end
 mutable struct  ProjectionMatrix <: ProjectiveEntity
 end
 
-mutable struct  ProjectionMatrices <: ProjectiveEntity
-    src::ProjectiveEntity
-    method::FactorisationAlgorithm
-    views::TotalViews
+struct  ProjectionMatrices{T₁ <: ProjectiveEntity, T₂ <: FactorisationAlgorithm, T₃ <: TotalViews } <: ProjectiveEntity
+    src::T₁
+    method::T₂
+    views::T₃
 end
 
-mutable struct  LatentVariables <: ProjectiveEntity
-    src::ProjectiveEntity
+struct  LatentVariables{T₁ <: ProjectiveEntity} <: ProjectiveEntity
+    src::T₁
 end
 
-mutable struct  Chojnacki <: FactorisationAlgorithm
+struct  Chojnacki <: FactorisationAlgorithm
 end
 
 mutable struct  HomogeneousCoordinates <: ProjectiveEntity
@@ -133,20 +133,24 @@ mutable struct  Pinhole <: CameraModel
     𝐞₂′::Vec{2,Float64}
 end
 
-mutable struct  CanonicalLens <: CameraModel
+struct  CanonicalLens <: CameraModel
 end
 
-mutable struct DirectLinearTransform <: EstimationAlgorithm
+struct DirectLinearTransform <: EstimationAlgorithm
 end
 
-mutable struct BundleAdjustment{A<:AbstractVector} <: EstimationAlgorithm
-    𝛉₀::A
+struct ManualEstimation{A<:AbstractArray} <: EstimationAlgorithm
+    𝚹::A
+end
+
+struct BundleAdjustment{EA <: EstimationAlgorithm} <: EstimationAlgorithm
+    seed::EA
     max_iter::Int64
     toleranceθ::Float64
 end
 
-mutable struct FundamentalNumericalScheme{A<:AbstractVector} <: EstimationAlgorithm
-    𝛉₀::A
+struct FundamentalNumericalScheme{EA <: EstimationAlgorithm} <: EstimationAlgorithm
+    seed::EA
     max_iter::Int64
     toleranceθ::Float64
 end
@@ -164,6 +168,9 @@ mutable struct ApproximateMaximumLikelihood <: CostFunction
 end
 const AML = ApproximateMaximumLikelihood
 
+struct ReprojectionError <: CostFunction
+end
+
 mutable struct CanonicalToHartley <: CoordinateSystemTransformation
 end
 
@@ -180,3 +187,69 @@ end
 
 mutable struct TwoViews <: TotalViews
 end
+
+abstract type AbstractExperiment end
+abstract type AbstractExperimentTrial end
+abstract type AbstractExperimentCondition end
+abstract type AbstractParticipant end
+abstract type AbstractTrialResult end
+abstract type AbstractConditionResult end
+abstract type AbstractParticipantResult end
+abstract type AbstractExperimentResult end
+
+
+struct Experiment{ActualProjectiveEntity <: ProjectiveEntity, ActualParticipant <: AbstractParticipant, ActualCostFunction <: CostFunction} <: AbstractExperiment
+    description::String
+    task::ActualProjectiveEntity
+    participants::Vector{ActualParticipant}
+    cost_function::ActualCostFunction
+end
+
+struct ExperimentTrial{ActualArray₁ <: AbstractArray, ActualArray₂ <: AbstractArray , ActualArray₃ <: AbstractArray, ActualArray₄ <: AbstractArray} <: AbstractExperimentTrial
+    pure_training_data::Tuple{ActualArray₁, Vararg{ActualArray₁}}
+    perturbed_training_data::Tuple{ActualArray₂, Vararg{ActualArray₂}}
+    pure_testing_data::Tuple{ActualArray₃, Vararg{ActualArray₃}}
+    correct_parameters::ActualArray₄
+end
+
+struct ExperimentCondition{ActualExperimentTrial <: AbstractExperimentTrial} <: AbstractExperimentCondition
+    description::String
+    trials::Vector{ActualExperimentTrial}
+end
+
+struct Participant{ActualEstimationAlgorithm <: EstimationAlgorithm, ActualExperimentCondition <: AbstractExperimentCondition} <: AbstractParticipant
+    algorithm::ActualEstimationAlgorithm
+    conditions::Dict{String, ActualExperimentCondition}
+end
+
+struct TrialResult{ActualCostFunction <: CostFunction} <: AbstractTrialResult
+    cost_function::ActualCostFunction
+    total_points::Int
+    val::Vector{Float64}
+end
+
+struct ConditionResult{ActualTrialResult <: AbstractTrialResult} <: AbstractConditionResult
+    description::String
+    outcomes::Vector{ActualTrialResult}
+end
+
+struct ParticipantResult{ActualParticipant <: AbstractParticipant, ActualConditionResult <: AbstractConditionResult} <: AbstractParticipantResult
+    participant::ActualParticipant
+    conditions::Dict{String, ActualConditionResult}
+    rmse::Float64
+end
+
+struct ExperimentResult{ActualProjectiveEntity <: ProjectiveEntity, ActualParticipantResult <: AbstractParticipantResult, ActualCostFunction <: CostFunction} <: AbstractExperimentResult
+    description::String
+    task::ActualProjectiveEntity
+    results::Vector{ActualParticipantResult}
+    cost_function::ActualCostFunction
+end
+
+struct PlanarScene
+    plane_count::Int
+    max_point_count::Int
+    roi_range::Tuple{UnitRange{Int},UnitRange{Int}}
+end
+
+#Tuple{MeasurementProperties, Vararg{MeasurementProperties}}

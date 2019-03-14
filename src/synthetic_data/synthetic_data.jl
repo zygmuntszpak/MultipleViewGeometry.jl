@@ -17,3 +17,25 @@ function generate_planar_points(𝐧::AbstractArray, d::Real, extent::Real, N::I
     end
     points
 end
+
+function generate_planar_points(x_range::AbstractRange, y_range::AbstractRange, z::Real, N::Int)
+    𝒳 = [Point3( rand(x_range), rand(y_range), z) for n = 1:N]
+end
+
+
+function crop(rect::HyperRectangle{2, <:Real}, 𝒟::Tuple{AbstractArray, Vararg{AbstractArray}})
+    ℳ₁, ℳ₁ʹ = 𝒟
+    ℳ₂ = Array{Point{2,Float64}}(undef,0)
+    ℳ₂ʹ= Array{Point{2,Float64}}(undef,0)
+    N = length(ℳ₁)
+    for n = 1:N
+        𝐦 = ℳ₁[n]
+        𝐦′ = ℳ₁ʹ[n]
+        if first(rect.origin) <= first(𝐦) <= first(rect.origin) + first(rect.widths) &&
+           last(rect.origin) <= last(𝐦) <= last(rect.origin) + last(rect.widths)
+           push!(ℳ₂, 𝐦)
+           push!(ℳ₂ʹ, 𝐦′)
+       end
+    end
+    (ℳ₂, ℳ₂ʹ)
+end

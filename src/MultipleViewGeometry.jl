@@ -11,7 +11,7 @@ export TotalViews, TwoViews
 export ProjectionMatrices, FactorisationAlgorithm, Chojnacki, LatentVariables
 export CameraModel, Pinhole, CanonicalLens
 export EstimationAlgorithm, DirectLinearTransform, Taubin, FundamentalNumericalScheme
-export BundleAdjustment
+export BundleAdjustment, ManualEstimation
 export CostFunction, ApproximateMaximumLikelihood, AML
 export HomogeneousCoordinates
 export CoordinateSystemTransformation, CanonicalToHartley, HartleyToCanonical
@@ -20,6 +20,13 @@ export Point2D, Point2DH, Point3D, Point3DH
 export HessianApproximation, CanonicalApproximation, CovarianceEstimationScheme
 export NoiseModel, GaussianNoise
 export RasterSystem, CartesianSystem, OpticalSystem
+export ReprojectionError
+export AbstractExperimentResult
+export AbstractExperiment, AbstractExperimentTrial, AbstractExperimentCondition
+export AbstractParticipant, AbstractTrialResult, AbstractConditionResult, AbstractParticipantResult
+export Experiment, ExperimentTrial, ExperimentCondition, Participant
+export TrialResult, ConditionResult, ParticipantResult, ExperimentResult
+export PlanarScene
 
 # Aliases exported from math_aliases.jl
 export ⊗, ∑, √
@@ -61,14 +68,19 @@ export rotate!, translate!, relocate!
 # Functions exported from `cost_functions.jl`
 export cost, X, covariance_matrix, covariance_matrix_debug
 
+# Functions exported from `deconstruct.jl`
+export deconstruct
+
+# Functions exported from `compose.jl`
+export compose
+
 # Functions exported from "synthetic_data.jl"
-export generate_planar_points
+export generate_planar_points, crop
 
 # Functions exported from `draw.jl`
 #export draw!, EpipolarLineGraphic, LineSegment3D, PlaneSegment3D, Camera3D
 #export WorldCoordinateSystem3D
 export draw!
-
 
 # Functions exported from `constraints.jl`
 export satisfy, EpipolarConstraint, Constraint
@@ -79,12 +91,19 @@ export triangulate
 # Functions exported from `noise.jl`
 export perturb
 
+# Functions exported from `analysis.jl`
+export assess, tabulate
+
+# Functions exported from "experiments.jl"
+export conduct_experiment, construct_experiment
+
 include("math_aliases/ModuleMathAliases.jl")
 include("types/ModuleTypes.jl")
 include("operators/ModuleOperators.jl")
 #include("rotation/ModuleRotation.jl")
 include("synthetic_data/ModuleSyntheticData.jl")
 include("camera/ModuleCamera.jl")
+include("factorization/ModuleFactorization.jl")
 include("move/ModuleMove.jl")
 include("data_normalization/ModuleDataNormalization.jl")
 include("transform/ModuleTransform.jl")
@@ -98,13 +117,17 @@ include("draw/ModuleDraw.jl")
 include("constraints/ModuleConstraints.jl")
 include("triangulation/ModuleTriangulation.jl")
 include("noise/ModuleNoise.jl")
+include("analysis/ModuleAnalysis.jl")
+include("experiment/ModuleExperiment.jl")
 
+using .ModuleAnalysis
 using .ModuleMathAliases
 using .ModuleTypes
 using .ModuleOperators
 #using .ModuleRotation
 using .ModuleSyntheticData
 using .ModuleCamera
+using .ModuleFactorization
 using .ModuleMove
 using .ModuleDataNormalization
 using .ModuleTransform
@@ -118,6 +141,7 @@ using .ModuleDraw
 using .ModuleConstraints
 using .ModuleTriangulation
 using .ModuleNoise
+using .ModuleExperiment
 
 
 # package code goes here

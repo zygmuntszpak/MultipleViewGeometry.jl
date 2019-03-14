@@ -1,5 +1,6 @@
 using MultipleViewGeometry, Test, LinearAlgebra
 using MultipleViewGeometry.ModuleTypes
+using MultipleViewGeometry.ModuleAnalysis
 using StaticArrays, Calculus, GeometryTypes
 using MultipleViewGeometry.ModuleSyntheticData
 using Random
@@ -64,52 +65,8 @@ relocate!(camera₂, 𝐑₂, 𝐭₂)
 𝐇₁ = estimate(HomographyMatrix(), DirectLinearTransform(), (ℳ₁, ℳ₁ʹ))
 𝐇₂ = estimate(HomographyMatrix(), DirectLinearTransform(), (ℳ₂, ℳ₂ʹ))
 
+r₁ = assess(ReprojectionError(), HomographyMatrix(), 𝐇₁, (ℳ₁, ℳ₁ʹ))
+r₂ = assess(ReprojectionError(), HomographyMatrix(), 𝐇₂, (ℳ₂, ℳ₂ʹ))
 
-for i = zip(ℳ₁,ℳ₁ʹ)
-    m, mʹ =  i
-    𝐦  = hom(m)
-    𝐦ʹ = hom(mʹ)
-    residual = vec2antisym(𝐦ʹ)*𝐇₁*𝐦
-    @test isapprox(sum(residual), 0.0; atol = 1e-7)
-end
-
-for i = zip(ℳ₂,ℳ₂ʹ)
-    m, mʹ =  i
-    𝐦  = hom(m)
-    𝐦ʹ = hom(mʹ)
-    residual = vec2antisym(𝐦ʹ)*𝐇₂*𝐦
-    @test isapprox(sum(residual), 0.0; atol = 1e-7)
-end
-
-
-# Test the Fundamental Numerical Scheme on the Fundamental matrix problem.
-Λ₁ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ₁)]
-Λ₂ =  [SMatrix{3,3}(Matrix(Diagonal([1.0,1.0,0.0]))) for i = 1:length(ℳ₁ʹ)]
-# 𝐇₁ʹ = estimate(HomographyMatrix(), FundamentalNumericalScheme(vec(𝐇₁), 5, 1e-10), (Λ₁,Λ₂), (ℳ₁, ℳ₁ʹ))
-# 𝐇₂ʹ = estimate(HomographyMatrix(), FundamentalNumericalScheme(vec(𝐇₂), 5, 1e-10), (Λ₁,Λ₂), (ℳ₂, ℳ₂ʹ))
-𝐇₁ʹ = estimate(HomographyMatrix(), FundamentalNumericalScheme(ManualEstimation(𝐇₁), 5, 1e-10), (Λ₁,Λ₂), (ℳ₁, ℳ₁ʹ))
-𝐇₂ʹ = estimate(HomographyMatrix(), FundamentalNumericalScheme(ManualEstimation(𝐇₂), 5, 1e-10), (Λ₁,Λ₂), (ℳ₂, ℳ₂ʹ))
-
-# Ensure the estimated and true matrix have the same scale and sign.
-𝐇₁ = 𝐇₁ / norm(𝐇₁)
-𝐇₁ = 𝐇₁ / sign(𝐇₁[1,1])
-
-𝐇₁ʹ = 𝐇₁ʹ / norm(𝐇₁ʹ)
-𝐇₁ʹ = 𝐇₁ʹ / sign(𝐇₁ʹ[1,1])
-
-𝐇₂ = 𝐇₂ / norm(𝐇₂)
-𝐇₂ = 𝐇₂ / sign(𝐇₂[1,1])
-
-𝐇₂ʹ = 𝐇₂ʹ / norm(𝐇₂ʹ)
-𝐇₂ʹ = 𝐇₂ʹ / sign(𝐇₂ʹ[1,1])
-
-@test 𝐇₁ ≈ 𝐇₁ʹ
-@test 𝐇₂ ≈ 𝐇₂ʹ
-
-# 𝐇₁ʹʹ, fit = estimate(HomographyMatrix(), BundleAdjustment(vec(𝐇₁), 5, 1e-10), (ℳ₁, ℳ₁ʹ))
-# 𝐇₂ʹʹ, fit = estimate(HomographyMatrix(), BundleAdjustment(vec(𝐇₂), 5, 1e-10), (ℳ₂, ℳ₂ʹ))
-𝐇₁ʹʹ = estimate(HomographyMatrix(), BundleAdjustment(ManualEstimation(𝐇₁), 5, 1e-10), (ℳ₁, ℳ₁ʹ))
-𝐇₂ʹʹ = estimate(HomographyMatrix(), BundleAdjustment(ManualEstimation(𝐇₂), 5, 1e-10), (ℳ₂, ℳ₂ʹ))
-
-@test 𝐇₁ ≈ 𝐇₁ʹʹ
-@test 𝐇₂ ≈ 𝐇₂ʹʹ
+@test isapprox(first(r₁), 0.0; atol = 1e-12)
+@test isapprox(first(r₂), 0.0; atol = 1e-12)

@@ -18,7 +18,7 @@ function construct( e::HomographyMatrix,
     if length(𝐧) != 3
         throw(ArgumentError("Expect length-3 normal vector."))
     end
-    # TODO Check that camera center does not lie on the plane. 
+    # TODO Check that camera center does not lie on the plane.
     𝐈 = SMatrix{3,3}(1.0I)
     𝐇 = 𝐊₂*𝐑₂*(𝐈 - (𝐧'*𝐭₁ + d)^-1 * (𝐭₁ - 𝐭₂) * 𝐧')/𝐑₁/𝐊₁
     SMatrix{3,3,Float64,3*3}(𝐇)

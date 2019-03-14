@@ -43,11 +43,15 @@ function estimate(entity::FundamentalMatrix, method::FundamentalNumericalScheme,
     if (N != length(Λ₀) || N != length(Λ₀ʹ) )
           throw(ArgumentError("There should be a covariance matrix for each point correspondence."))
     end
+
+    # Initial estimate which will be used to seed the fundmamental numerical scheme.
+    𝛉₀ = vec(estimate(FundamentalMatrix(), method.seed, 𝒟))
+
     # Map corresponding points to the normalized coordinate system.
-    𝒪, 𝐓 = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳ)
-    𝒪ʹ, 𝐓ʹ = transform(HomogeneousCoordinates(),CanonicalToHartley(),ℳʹ)
+    𝒪, 𝐓 = transform(HomogeneousCoordinates(), CanonicalToHartley(), ℳ)
+    𝒪ʹ, 𝐓ʹ = transform(HomogeneousCoordinates(), CanonicalToHartley(), ℳʹ)
     # Map seed to the normalized coordinate system.
-    𝛉 = (inv(𝐓') ⊗ inv(𝐓ʹ')) * method.𝛉₀
+    𝛉 = (inv(𝐓') ⊗ inv(𝐓ʹ')) * 𝛉₀
     # Map covariance matrices to the normalized coordinate system.
     Λ₁ = transform(CovarianceMatrices(), CanonicalToHartley(), Λ₀ , 𝐓)
     Λ₁ʹ = transform(CovarianceMatrices(), CanonicalToHartley(), Λ₀ʹ , 𝐓ʹ)
@@ -69,10 +73,12 @@ function estimate(entity::FundamentalMatrix, method::BundleAdjustment,  𝒟::Tu
     if (N != length(ℳʹ))
           throw(ArgumentError("There should be an equal number of points for each view."))
     end
-    𝐅 = SMatrix{3,3,Float64,9}(reshape(method.𝛉₀,(3,3)))
-    𝒳 = triangulate(DirectLinearTransform(),𝐅,(ℳ,ℳʹ))
+    # Initial estimate which will be used to seed the fundmamental numerical scheme.
+    𝐅₀  = estimate(FundamentalMatrix(), method.seed, 𝒟)
+    #𝐅 = SMatrix{3,3,Float64,9}(reshape(method.𝛉₀,(3,3)))
+    𝒳 = triangulate(DirectLinearTransform(), 𝐅₀, (ℳ,ℳʹ))
 
-    𝐏₁, 𝐏₂ = construct(ProjectionMatrix(),𝐅)
+    𝐏₁, 𝐏₂ = construct(ProjectionMatrix(), 𝐅₀)
 
     # Construct a length-(12+3*N) vector consisting of the projection matrix associated
     # with the second view (the first twelve dimensions), as well as N three-dimensional points
@@ -89,7 +95,7 @@ function estimate(entity::FundamentalMatrix, method::BundleAdjustment,  𝒟::Tu
     fit = curve_fit(model_fundamental, jacobian_model,  𝐏₁, reshape(reinterpret(Float64,vec(pts)),(4*N,)) , 𝛉; show_trace = false)
     𝐏₂ = reshape(fit.param[1:12],(3,4))
     𝐅 = construct(FundamentalMatrix(), 𝐏₁, 𝐏₂)
-    𝐅, fit
+    𝐅
 end
 
 function model_fundamental(𝐏₁,𝛉)
@@ -122,7 +128,7 @@ function jacobian_model(𝐏₁,𝛉)
     𝐏₂ = SMatrix{3,4,Float64,12}(reshape(𝛉v,(3,4)))
     𝐉 = zeros(4*N,12+3*N)
     # Create a view of the jacobian matrix 𝐉 and reshape it so that
-    # it will be more convenient to index into the appropriate entires
+    # it will be more convenient to index into the appropriate entries
     # whilst looping over all of the data points.
     𝐉v = reshape(reinterpret(Float64,𝐉), 4, N, 12+3*N)
     𝐀 = SMatrix{2,3,Float64,6}(1,0,0,1,0,0)

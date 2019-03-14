@@ -1,0 +1,9 @@
+module ModuleExperiment
+using MultipleViewGeometry.ModuleTypes,  MultipleViewGeometry.ModuleOperators, MultipleViewGeometry.ModuleMathAliases
+using MultipleViewGeometry.ModuleCostFunction
+using MultipleViewGeometry.ModuleSyntheticData
+using MultipleViewGeometry
+using StaticArrays, LinearAlgebra, GeometryTypes, Random
+export conduct_experiment, construct_experiment
+include("experiment.jl")
+end
