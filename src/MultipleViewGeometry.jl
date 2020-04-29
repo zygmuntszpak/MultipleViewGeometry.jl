@@ -63,6 +63,7 @@ include("fit/fit_homography.jl")
 include("fit/fit_fundamental_matrix.jl")
 include("view/visualize_properties.jl")
 include("context/aquire_context.jl")
+include("context/calibration_context.jl")
 include("context/visualize_context.jl")
 
 
@@ -175,6 +176,9 @@ export fit_homography
 
 # fit_fundamental_matrix.jl
 export fit_fundamental_matrix
+
+# calibration_context.jl
+export CalibrateCamera
 
 
 end # module
