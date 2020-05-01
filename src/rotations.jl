@@ -54,3 +54,8 @@ function rodrigues2matrix(vˣ::Real,vʸ::Real,vᶻ::Real)
       𝐖 = vec2antisym(𝐯)
       𝐑 = 𝐈 + 𝐖 * sin(θ) + 𝐖^2 * (1-cos(θ))
 end
+
+function matrix2rodrigues(𝐑::AbstractArray)
+      𝐑₃₂
+      𝐩 = SVector()
+end

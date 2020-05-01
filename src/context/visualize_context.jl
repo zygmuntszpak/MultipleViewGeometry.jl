@@ -49,8 +49,8 @@ end
 
 #TODO remove unnecessary parameters
 function draw_world!(scene::Union{AbstractPlotting.Scene, PGFPlotsX.Axis}, world::AbstractWorld, scale::Real, markersize::Number)
-    @unpack points, planes, groups = world
-    draw_coordinate_system!(scene, scale)
+    @unpack points, planes, groups, coordinate_system = world
+    draw_coordinate_system!(scene, coordinate_system, scale)
     draw_point_groups!(scene, markersize, points, groups)
     # We want to draw a minimum enclosing border around the points that lie on a plane
     draw_planes!(scene, planes, points)
@@ -144,7 +144,8 @@ function colormesh((geometry, color))
     return GeometryBasics.pointmeta(mesh1; color=fill(color, npoints))
 end
 
-function draw_coordinate_system!(scene::AbstractPlotting.Scene, scale::Real)
+function draw_coordinate_system!(scene::AbstractPlotting.Scene, coordinate_system::AbstractCoordinateSystem, scale::Real)
+    # TODO Fix the drawing of the coordinate system.
     x = Vec3f0(0); baselen = 0.2f0 * scale ; dirlen = 1f0 * scale
     # create an array of differently colored boxes in the direction of the 3 axes
     rectangles = [
@@ -156,7 +157,8 @@ function draw_coordinate_system!(scene::AbstractPlotting.Scene, scale::Real)
     mesh!(scene, merge(meshes))
 end
 
-function draw_coordinate_system!(scene::PGFPlotsX.Axis, scale::Real)
+function draw_coordinate_system!(scene::PGFPlotsX.Axis, coordinate_system::AbstractCoordinateSystem, scale::Real)
+    # TODO Fix the drawing of the coordinate system.
     linewidth = 1
     linesegment!(scene, [0, 0, 0] => [scale*3, 0, 0], colorant"red", linewidth = linewidth)
     linesegment!(scene, [0, 0, 0] => [0, scale*3, 0], colorant"green", linewidth = linewidth)

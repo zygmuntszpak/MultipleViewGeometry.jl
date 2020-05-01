@@ -5,7 +5,7 @@ abstract type AbstractExtrinsicParameters end
 
 
 Base.@kwdef struct IntrinsicParameters <: AbstractIntrinsicParameters
-    focal_length::Float64 = 50
+    focal_length::Float64 = 50 # TODO set to 1
     width::Int = 1000
     height::Int = 1000
     # Diagonal distortion of the image plane (which is usually negligible or zero).
@@ -61,9 +61,20 @@ function extrinsics(model::AbstractCameraModel)
     return extrinsics
 end
 
+# TODO add copy constructor
 Base.@kwdef struct Camera{T₁ <: AbstractCameraModel, T₂ <: AbstractImage} <: AbstractCamera
     model::T₁ = Pinhole()
     image_type::T₂ = AnalogueImage()
+end
+
+function extrinsics(camera::AbstractCamera)
+    @unpack model = camera
+    return extrinsics(model)
+end
+
+function intrinsics(camera::AbstractCamera)
+    @unpack model = camera
+    return intrinsics(model)
 end
 
 function model(camera::AbstractCamera)

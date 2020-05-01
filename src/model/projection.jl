@@ -40,6 +40,7 @@ function construct_projection(model::AbstractCameraModel, reference_system::Abst
     𝐊 = matrix(intrinsics, image_system)
     𝐄 = matrix(extrinsics, reference_system)
     𝐏 = 𝐊 * 𝐄
+    𝐏 = 𝐏 / norm(𝐏) # TODO optionally remove this normalization
     return 𝐏
 end
 

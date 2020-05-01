@@ -27,7 +27,10 @@ import ProjectiveNumericalSchemes: matrices
 import ProjectiveNumericalSchemes: hom, hom⁻¹
 import ProjectiveNumericalSchemes: ApproximateMaximumLikelihood
 import ProjectiveNumericalSchemes: AbstractUncertainObservations
+import ProjectiveNumericalSchemes: VectorValuedObjective
+import ProjectiveNumericalSchemes: SumOfSquares
 
+const ReprojectionError = SumOfSquares
 
 
 
