@@ -14,6 +14,8 @@ function hom(v::StaticVector)
     push(v,1)
 end
 
+# Strictly speaking this is ignores the fact that hom⁻¹ also
+# drops the last component. 
 function ∂hom⁻¹(𝐧::StaticVector)
     k = length(𝐧)
     𝐞ₖ = push(zeros(SVector{k-1}),1.0)

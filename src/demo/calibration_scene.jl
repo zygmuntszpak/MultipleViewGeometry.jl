@@ -3,14 +3,15 @@ using StaticArrays
 using Parameters
 using GeometryBasics
 using Setfield
-import Makie
+using LinearAlgebra
+#import Makie
 
 
 function construct_calibration_world()
     # Note that the world coordinate system is chosen in accordance with the OpticalSystem of the camera.
     # This is the traditional convention for camera calibration.
     coordinate_system  = CartesianSystem(Point(0.0, 0.0, 0.0), Vec(-1.0, 0.0, 0.0), Vec(0.0, -1.0, 0.0), Vec(0.0, 0.0, 1.0))
-    N = 10
+    N = 3
     limits = range(-500; stop = 500, length = N)
     points = vec([Point3(x, y, 0.0) for x in limits, y in limits])
     planes = [EuclideanPlane3D(CartesianSystem(Point(0.0, 0.0, 0.0), Vec(-1.0, 0.0, 0.0), Vec(0.0, -1.0, 0.0), Vec(0.0, 0.0, 1.0)))]
@@ -49,11 +50,11 @@ camera₄ = Camera(image_type = analogue_image₄, model = pinhole₄)
 camera₄ = relocate(camera₄, 𝐑₄, 𝐭₄)
 
 
-visualize =  VisualizeWorld(; visual_properties = MakieVisualProperties(scale = 150, markersize = 25))
+# visualize =  VisualizeWorld(; visual_properties = MakieVisualProperties(scale = 150, markersize = 25))
 cameras = [camera₁, camera₂, camera₃, camera₄]
-visualize(world, cameras)
-@unpack scene = visualize
-display(scene)
+# visualize(world, cameras)
+# @unpack scene = visualize
+# display(scene)
 
 
 calibrate = CalibrateCamera()
@@ -84,7 +85,8 @@ Z = calibrate(world, cameras)
 # # Determine projections of the 3D points in each camera view.
 # 𝓜 = [aquire(world, camera) for camera in cameras]
 #
-# ℋ = [fit_homography(ℳ′,ℳ,  DirectLinearTransform()) for ℳ in 𝓜]
+# #ℋ = [fit_homography(ℳ′,ℳ,  DirectLinearTransform()) for ℳ in 𝓜]
+# ℋ = [fit_homography(ℳ′,ℳ,  LevenbergMarquardt()) for ℳ in 𝓜]
 # 𝐇₁ = matrix(ℋ[1])
 # 𝐇₁ = 𝐇₁ / norm(𝐇₁)
 #

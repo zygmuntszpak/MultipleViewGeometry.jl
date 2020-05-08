@@ -15,6 +15,9 @@ using ProjectiveNumericalSchemes
 using StaticArrays
 using Statistics
 using Setfield
+using Rotations
+using FiniteDiff
+using ForwardDiff # TODO add this to test set instead for debugging purposes
 
 
 import ProjectiveNumericalSchemes: evaluate_gradient, evaluate_hessian
@@ -39,6 +42,7 @@ abstract type AbstractContext end
 abstract type TwoView <: AbstractContext end
 
 struct HomographyEstimationTask <: AbstractEstimationTask end
+struct CameraCalibrationTask <: AbstractEstimationTask end
 struct FundamentalMatrixEstimationTask <: AbstractEstimationTask end
 abstract type AbstractFittingMethod end
 
@@ -62,6 +66,7 @@ include("model/projection.jl")
 include("model/carrier.jl")
 include("model/homography_matrix.jl")
 include("model/fundamental_matrix.jl")
+include("fit/fit_camera_matrix.jl")
 include("fit/fit_homography.jl")
 include("fit/fit_fundamental_matrix.jl")
 include("view/visualize_properties.jl")
@@ -175,7 +180,9 @@ export DirectLinearTransform,
        UncertainObservations
 
 # fit_homography.jl
-export fit_homography
+export fit_homography,
+       LevenbergMarquardt # TODO move
+
 
 # fit_fundamental_matrix.jl
 export fit_fundamental_matrix

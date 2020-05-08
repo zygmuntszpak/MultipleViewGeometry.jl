@@ -32,13 +32,61 @@ function (calibrate::CalibrateCamera)(world::AbstractWorld, cameras::Vector{<:Ab
     # Determine the lens distortion parameters.
     𝐤 = get_lens_distortion(𝐀, ℰ, points, 𝓜)
 
+    @show typeof(𝐤)
     # Refine all estimates by minimising the reprojection error.
+    # 𝛈 = refine_parameters(𝐀, 𝐤, ℰ, points, 𝓜)
+
+    val = distort(𝓜[1][1], 𝐤)
+
+    val2 = radial_deviation(2.0, SVector(1.0,2.0))
+
+    fit_camera_matrix(𝐀, 𝐤, ℰ, points, 𝓜, LevenbergMarquardt())
+
+    #g = x-> radial_deviation(x, SVector(1.0,2.0))
+    # 𝐉₁ = FiniteDiff.finite_difference_derivative(g, 2.0)
+    #𝐉₂ = ∂ₖradial_deviation(2.0, SVector(1.0,2.0))
+
+    #g = x-> distortion(x, SVector(1.0,2.0))
+    #g = x-> distort([2.0, 4.0], x)
+    #P̃(𝐗::AbstractVector, 𝐰::AbstractVector)
+    # result = P̃(SVector(1.0, 2.0, 3.0), SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+    # @show result
+
+    # 𝛈 = compose_parameter_vector(𝐀, 𝐤, ℰ)
+    # #𝛈[6] = 0
+    # #𝛈[7] = 0
+    # @show project_with_lens(SVector(1.0, 2.0, 3.0), 𝛈[1:13])
+    #
+    # # g = x-> P̃(SVector(1.0, 2.0, 3.0), x)
+    # # 𝐉₁ = FiniteDiff.finite_difference_jacobian(g, SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+    # # 𝐉₂ = ∂P̃_𝛚(SVector(1.0, 2.0, 3.0), SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+    #
+    # g = x-> project_with_lens(SVector(1.0, 2.0, 3.0), x)
+    # 𝐉₁ = FiniteDiff.finite_difference_jacobian(g, 𝛈[1:13])
+    # 𝐉₂ = ∂project_with_lens(SVector(1.0, 2.0, 3.0), 𝛈[1:13])
+    #
+    # # g = x-> apply_intrinsics(x, 𝛈[1:13])
+    # # 𝐉₁ = FiniteDiff.finite_difference_jacobian(g, SVector(3.0,2.0))
+    # # 𝐉₂ = ∂𝐀₀_𝐱(SVector(3.0,2.0), 𝛈[1:13])
+    #
+    #
+    #
+    #
+    #
+    # #g = x-> W(x)
+    # #𝐉₁ = FiniteDiff.finite_difference_jacobian(g, SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+    # #𝐉₂ = ∂𝐰_rt(SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+    # println("start")
+    # display(𝐉₁)
+    # display(𝐉₂)
+    # display(norm(𝐉₁ .- 𝐉₂))
+    # println("end")
 
 
     #display(𝐀₁)
     #𝐀₂ = get_camera_intrinsics(ℋ; use_analytical_method = false)
     #display(𝐀₂)
-    return 𝐤
+    return val2
 end
 
 """
@@ -206,5 +254,239 @@ function get_lens_distortion(𝐀::AbstractArray, ℰ::AbstractArray, 𝒳::Abst
     end
     # Solve the linear system of equations to obtain lens parameter vector.
     𝐤 = 𝐃 \ 𝐝
-    return 𝐤
+    return SVector{2,Float64}(𝐤...)
 end
+
+"""
+   refine_parameters(𝐀::AbstractArray, 𝛋::AbstractVector, ℰ::AbstractVector, 𝒳::AbstractVector, 𝓜::AbstractVector)
+
+Given a seed for the camera instrincs 𝐀, lens distortion 𝛋, extrinsic
+view parameters ℰ, 3D points on the calibration target 𝒳 and observed
+image points 𝓜, returns refined estimates for the camera intrinsics,
+distortion parameters and camera view parameters, respectively.
+"""
+function refine_parameters(𝐀::AbstractArray, 𝐤::AbstractVector, ℰ::AbstractVector, 𝒳::AbstractVector, 𝓜::AbstractVector)
+    𝛈 = compose_parameter_vector(𝐀, 𝐤, ℰ)
+    return 𝛈
+end
+
+# """
+#    compose_parameter_vector(𝐀::AbstractArray, 𝛋::AbstractVector, ℰ::AbstractVector)
+#
+# Given the camera instrincs 𝐀, lens distortion 𝛋, and extrinsic
+# view parameters ℰ, returns a length-(7 + M6) parameter vector 𝛈.
+# """
+# function compose_parameter_vector(𝐀::AbstractArray, 𝐤::AbstractVector, ℰ::AbstractVector)
+#     α = 𝐀[1,1]
+#     γ = 𝐀[1,2]
+#     uc = 𝐀[1,3]
+#     β = 𝐀[2,2]
+#     vc = 𝐀[2,3]
+#     k₁ = 𝐤[1]
+#     k₂ = 𝐤[2]
+#     𝐚 = [α, β, γ, uc, vc, k₁,k₂]
+#     𝛈 = 𝐚
+#     M = length(ℰ)
+#     for m = 1:M
+#         𝐄ₘ = ℰ[m]
+#         𝐑 = RotMatrix{3}(𝐄ₘ[:, 1:3])
+#         # "stereographic projection" of a normalized quaternion
+#         𝐫 = SPQuat(𝐑)
+#         𝐭 = 𝐄ₘ[:, 4]
+#         𝐰 = [𝐫.x, 𝐫.y, 𝐫.z, 𝐭[1], 𝐭[2], 𝐭[3]]
+#         𝛈 = vcat(𝛈, 𝐰)
+#     end
+#     return 𝛈
+# end
+#
+# """
+#     P̃(𝐗::AbstractVector, 𝐰::AbstractVector)
+#
+# Maps the 3D point 𝐗 to image coordinates (i.e. sensor coordinates  in
+# the `OpticalSystem` coordinate system,  before camera intrinsics are applied)
+# using the view parameters 𝛚 = [𝐫, 𝐭], where 𝐫 are modified Rodrigues parameters
+# and 𝐭 is a translation.
+# """
+# function P̃(𝐗::AbstractVector, 𝛚::AbstractVector)
+#     𝐫 = SPQuat(𝛚[1], 𝛚[2], 𝛚[3])
+#     𝐭 = SVector(𝛚[4], 𝛚[5], 𝛚[6])
+#     𝐑 = RotMatrix(𝐫)
+#     𝐖 = hcat(𝐑, 𝐭)
+#     #=
+#         f(𝛚; 𝐗) =  hom⁻¹(𝐖 * hom(𝐗)) where 𝐖 = reshape(𝐰(𝛚), (3,4)).
+#         This is equivalent to  f(𝛚; 𝐗) = hom⁻¹((𝐗' ⊗ 𝐈₃) * 𝐰(𝛚)).
+#     =#
+#     𝐦 = hom⁻¹(𝐖 * hom(𝐗))
+#     return 𝐦
+# end
+#
+# # TODO make this a functor
+# function project_with_lens(𝐗::AbstractVector, 𝛈::AbstractVector)
+#     # Camera intrinsic parameters.
+#     𝐢 = SVector{5, Float64}(𝛈[1:5]...)
+#     # Lens distortion parameters.
+#     𝐤 = SVector{2, Float64}(𝛈[6:7]...)
+#     # Extrinsics parameters (modified Rodrigues rotation and translation)
+#     𝛚 = SVector{6, Float64}(𝛈[8:13]...)
+#     # Project assuming the identity matrix for camera intrinsics
+#     𝐱₀ = P̃(𝐗, 𝛚)
+#     # Apply lens distortion.
+#     𝐱₁ = distort(𝐱₀, 𝐤)
+#     # Apply affine transformation associated with the intrinsic camera parameters.
+#     𝐲 = apply_intrinsics(𝐱₁, 𝐢)
+#     return 𝐲
+# end
+#
+# function ∂project_with_lens(𝐗::AbstractVector, 𝛈::AbstractVector)
+#     # Camera intrinsic parameters.
+#     𝐢 = SVector{5, Float64}(𝛈[1:5]...)
+#     # Lens distortion parameters.
+#     𝐤 = SVector{2, Float64}(𝛈[6:7]...)
+#     # Extrinsics parameters (modified Rodrigues rotation and translation)
+#     𝛚 = SVector{6, Float64}(𝛈[8:13]...)
+#
+#     # Project assuming the identity matrix for camera intrinsics
+#     𝐱₀ = P̃(𝐗, 𝛚)
+#     # Apply lens distortion.
+#     𝐱₁ = distort(𝐱₀, 𝐤)
+#     # Apply affine transformation associated with the intrinsic camera parameters.
+#     𝐲 = apply_intrinsics(𝐱₁, 𝐢)
+#
+#     𝐉₁ = ∂𝐀₀_𝐢(𝐱₁, 𝐢)
+#     𝐉₂ = ∂𝐀₀_𝐱(𝐱₁, 𝐢) * ∂ₖdistort(𝐱₀, 𝐤)
+#     𝐉₃ = ∂𝐀₀_𝐱(𝐱₁, 𝐢) * ∂ₓdistort(𝐱₀, 𝐤) * ∂P̃_𝛚(𝐗, 𝛚)
+#     𝐉  = hcat(𝐉₁, 𝐉₂, 𝐉₃)
+#
+#     return 𝐉
+# end
+#
+# function apply_intrinsics(𝐱::AbstractVector, 𝐢::AbstractVector)
+#     𝐦 = hom(𝐱)
+#     α = 𝐢[1]
+#     γ = 𝐢[2]
+#     β = 𝐢[3]
+#     uc = 𝐢[4]
+#     vc = 𝐢[5]
+#     𝐀₀ = SMatrix{2,3,Float64,6}(α, 0 , γ , β, uc, vc)
+#     𝐮 = 𝐀₀ * 𝐦
+#     return 𝐮
+# end
+#
+# function ∂𝐀₀_𝐱(𝐱::AbstractVector, 𝐢::AbstractVector)
+#     α = 𝐢[1]
+#     γ = 𝐢[2]
+#     β = 𝐢[3]
+#     𝐉 = SMatrix{2,2,Float64,4}(α, 0 , γ , β)
+#     return 𝐉
+# end
+#
+# function ∂𝐀₀_𝛈(𝐱::AbstractVector, 𝛈::AbstractVector)
+#     # Camera intrinsic parameters.
+#     𝐢 = SVector{5, Float64}(𝛈[1:5]...)
+#     𝐉₁ = ∂𝐀₀_𝐢(𝐱, 𝐢)
+#     𝐉₂ = zeros(2,2)
+#     𝐉₃ = zeros(2,6)
+#     𝐉  = hcat(𝐉₁, 𝐉₂, 𝐉₃)
+#     return 𝐉
+# end
+#
+# function ∂𝐀₀_𝐢(𝐱::AbstractVector, 𝐢::AbstractVector)
+#     𝐦 = hom(𝐱)
+#     α = 𝐢[1]
+#     γ = 𝐢[2]
+#     β = 𝐢[3]
+#     uc = 𝐢[4]
+#     vc = 𝐢[5]
+#     𝐃 = SMatrix{6,5,Float64, 30}(1, 0, 0, 0, 0, 0,
+#                                  0, 0, 1, 0, 0, 0,
+#                                  0, 0, 0, 1, 0, 0,
+#                                  0, 0, 0, 0, 1, 0,
+#                                  0, 0, 0, 0, 0, 1)
+#     𝐈₂ = SMatrix{2,2, Float64}(I(2))
+#     𝐉 = (𝐦' ⊗ 𝐈₂) * 𝐃
+#     return 𝐉
+# end
+#
+# function ∂𝐰_𝛚(𝛚::AbstractVector)
+#     𝐫 = SPQuat(𝛚[1], 𝛚[2], 𝛚[3])
+#     𝐭 = SVector(𝛚[4], 𝛚[5], 𝛚[6])
+#     𝐑 = RotMatrix(𝐫)
+#     𝐖 = hcat(𝐑, 𝐭)
+#     𝐈₃ = SMatrix{3,3, Float64}(I(3))
+#     ∂R_𝛚 = vcat(Rotations.jacobian(RotMatrix, 𝐫), zeros(3,3))
+#     ∂t_𝛚 = vcat(zeros(9,3), 𝐈₃)
+#     𝐉 = hcat(∂R_𝛚, ∂t_𝛚)
+#     return 𝐉
+# end
+#
+# function ∂P̃_𝛈(𝐗::AbstractVector, 𝛈::AbstractVector)
+#     # Camera intrinsic parameters.
+#     𝐢 = SVector{5, Float64}(𝛈[1:5]...)
+#     # Lens distortion parameters.
+#     𝐤 = SVector{2, Float64}(𝛈[6:7]...)
+#     # Extrinsics parameters (modified Rodrigues rotation and translation)
+#     𝛚 = SVector{6, Float64}(𝛈[8:13]...)
+#
+#     # TODO ∂𝐗
+#
+#     𝐉₁ = zeros(2,5)
+#     𝐉₂ = zeros(2,2)
+#     𝐉₃ = ∂P̃_𝛚(𝐗, 𝛚)
+#     𝐉  = hcat(𝐉₁, 𝐉₂, 𝐉₃)
+#     return 𝐉
+# end
+#
+# function  ∂P̃_𝛚(𝐗::AbstractVector, 𝛚::AbstractVector)
+#     𝐫 = SPQuat(𝛚[1], 𝛚[2], 𝛚[3])
+#     𝐭 = SVector(𝛚[4], 𝛚[5], 𝛚[6])
+#     𝐑 = RotMatrix(𝐫)
+#     𝐖 = hcat(𝐑, 𝐭)
+#     𝐰 = vec(𝐖)
+#     𝐈₃ = SMatrix{3,3, Float64}(I(3))
+#     𝐃 = SMatrix{2,3,Float64,6}(1, 0, 0, 1, 0, 0)
+#     #=
+#         f(𝛚; 𝐗) =  hom⁻¹(𝐖 * hom(𝐗)) where 𝐖 = reshape(𝐰(𝛚), (3,4)).
+#         This is equivalent to  f(𝛚; 𝐗) = (hom(𝐗)' ⊗ 𝐈₃) * 𝐰(𝛚).
+#     =#
+#     𝐌 = hom(𝐗)
+#     𝐉 = 𝐃 * ∂hom⁻¹((𝐌' ⊗ 𝐈₃) * 𝐰) * (𝐌' ⊗ 𝐈₃) * ∂𝐰_𝛚(𝛚)
+#     return 𝐉
+# end
+#
+#
+# # TODO Make this a functor
+# function distort(𝐱::AbstractVector, 𝐤::AbstractVector)
+#     D = radial_deviation
+#     𝐲 = 𝐱 + 𝐱 * D(norm(𝐱), 𝐤)
+#     return 𝐲
+# end
+#
+# function ∂ₖdistort(𝐱::AbstractVector, 𝐤::AbstractVector)
+#     𝐝ᵤ = 𝐱 * ∂ₖradial_deviation(norm(𝐱), 𝐤)
+#     return 𝐝ᵤ
+# end
+#
+# function ∂ₓdistort(𝐱::AbstractVector, 𝐤::AbstractVector)
+#     𝐈 = SMatrix{2,2}(I)
+#     𝐝ᵤ =  𝐈 + 𝐈 * radial_deviation(norm(𝐱), 𝐤) + 𝐱 * ∂ᵣradial_deviation(norm(𝐱), 𝐤) *  ∂norm(𝐱)
+#     return 𝐝ᵤ
+# end
+#
+# # TODO Make this a functor
+# function radial_deviation(r::Number, 𝐤::AbstractVector)
+#     return 𝐤[1] * r^2 + 𝐤[2] * r^4
+# end
+#
+# function ∂ᵣradial_deviation(r::Number, 𝐤::AbstractVector)
+#     return 2*𝐤[1]*r + 4*𝐤[2]*r^3
+# end
+#
+# function ∂ₖradial_deviation(r::Number, 𝐤::AbstractVector)
+#     ∂₁ = r^2
+#     ∂₂ = r^4
+#     return transpose(SVector(∂₁, ∂₂))
+# end
+#
+# function ∂norm(𝐱)
+#     return 𝐱' / norm(𝐱)
+# end
