@@ -6,6 +6,7 @@ struct AquireImage <: AbstractContext end
 # TODO perhaps allow specifciation of what coordinate system one is considering for the image aquisition
 function (aquire::AquireImage)(world::AbstractWorld, camera::AbstractCamera)
     @unpack points = world
-    image_points = project(Projection(camera), points)
+    @unpack coordinate_system = world
+    image_points = project(Projection(camera, coordinate_system), points)
     return image_points
 end

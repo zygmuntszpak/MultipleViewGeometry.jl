@@ -38,9 +38,6 @@ function fit_sole_camera_rig(𝐀::AbstractArray, 𝐤::AbstractVector, ℰ::Abs
     𝛈, λ = method(objective, observations, jacobian_matrix) # TODO change order to: observations, objective
     @show λ
     cameras = compose_camera_structures(𝛈)
-    # 𝐇 = reshape(𝛈[1:9],(3,3))
-    # 𝐇 = SMatrix{3,3,Float64,9}(𝐇 / norm(𝐇))
-    # return HomographyMatrix(𝐇)
     return cameras
 end
 
@@ -164,8 +161,19 @@ function compose_camera_structures(𝛈::AbstractVector)
                                      scale_y = scale_y,
                                      principal_point = Point(uc, vc))
     radial_distortion = RadialDistortionModel(coefficients = SVector(k₁, k₂))
-    model = Lens(intrinsics = intrinsics, distortion = radial_distortion)
+    # Note that the world coordinate system is chosen in accordance with the
+    # OpticalSystem of the camera. This is the traditional convention for camera
+    # calibration.
+    world_coordinate_system  = CartesianSystem(Point(0.0, 0.0, 0.0),
+                                                Vec(1.0, 0.0, 0.0),
+                                                Vec(0.0, 1.0, 0.0),
+                                                Vec(0.0, 0.0, 1.0))
+    extrinsics = ExtrinsicParameters(world_coordinate_system)
+
+    model = Lens(intrinsics = intrinsics, distortion = radial_distortion,
+                 extrinsics = extrinsics)
     image_type = AnalogueImage(coordinate_system = OpticalSystem())
+
 
     # Instantiate cameras with the approriate intrinsic parameters but
     # located at the origin of the coordinate system.

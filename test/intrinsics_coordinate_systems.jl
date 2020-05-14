@@ -24,22 +24,22 @@
     aquire = AquireImage()
 
     projected_points₁ = aquire(world, camera₁)
-    @test projected_points₁[1] == Point(-10.0, -10.0)
-    @test projected_points₁[2] == Point(-10.0, 10.0)
-    @test projected_points₁[3] == Point(10.0, 10.0)
-    @test projected_points₁[4] == Point(10.0, -10.0)
+    @test projected_points₁[1] ≈ Point(-10.0, -10.0)
+    @test projected_points₁[2] ≈ Point(-10.0, 10.0)
+    @test projected_points₁[3] ≈ Point(10.0, 10.0)
+    @test projected_points₁[4] ≈ Point(10.0, -10.0)
 
     projected_points₂ = aquire(world, camera₂)
-    @test projected_points₂[1] == Point(490.0, 490.0)
-    @test projected_points₂[2] == Point(490.0, 510.0)
-    @test projected_points₂[3] == Point(510.0, 510.0)
-    @test projected_points₂[4] == Point(510.0, 490.0)
+    @test projected_points₂[1] ≈ Point(490.0, 490.0)
+    @test projected_points₂[2] ≈ Point(490.0, 510.0)
+    @test projected_points₂[3] ≈ Point(510.0, 510.0)
+    @test projected_points₂[4] ≈ Point(510.0, 490.0)
 
     projected_points₃ = aquire(world, camera₃)
-    @test projected_points₃[1] == Point(490.0, 510.0)
-    @test projected_points₃[2] == Point(490.0, 490.0)
-    @test projected_points₃[3] == Point(510.0, 490.0)
-    @test projected_points₃[4] == Point(510.0, 510.0)
+    @test projected_points₃[1] ≈ Point(490.0, 510.0)
+    @test projected_points₃[2] ≈ Point(490.0, 490.0)
+    @test projected_points₃[3] ≈ Point(510.0, 490.0)
+    @test projected_points₃[4] ≈ Point(510.0, 510.0)
 
     # TODO Add tests for case where principal point is not equal to the origin
     # of the optical axis.

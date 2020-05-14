@@ -18,6 +18,7 @@ using Setfield
 using Rotations
 using FiniteDiff
 using ForwardDiff # TODO add this to test set instead for debugging purposes
+using Random
 
 
 import ProjectiveNumericalSchemes: evaluate_gradient, evaluate_hessian
@@ -66,6 +67,7 @@ include("model/projection.jl")
 include("model/carrier.jl")
 include("model/homography_matrix.jl")
 include("model/fundamental_matrix.jl")
+include("model/noise.jl")
 include("fit/fit_sole_camera_rig.jl")
 include("fit/fit_homography.jl")
 include("fit/fit_fundamental_matrix.jl")
@@ -73,7 +75,6 @@ include("view/visualize_properties.jl")
 include("context/aquire_context.jl")
 include("context/calibration_context.jl")
 include("context/visualize_context.jl")
-
 
 
 # allotment.jl
@@ -93,6 +94,8 @@ export  AbstractCamera,
         extrinsics,
         intrinsics,
         Camera,
+        coefficients,
+        distortion,
         model,
         image_type,
         translate,
@@ -192,6 +195,9 @@ export fit_fundamental_matrix
 
 # calibration_context.jl
 export CalibrateCamera
+
+# noise.jl
+export apply_noise
 
 
 end # module

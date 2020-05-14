@@ -22,6 +22,8 @@ Base.@kwdef struct IntrinsicParameters <: AbstractIntrinsicParameters
     coordinate_system = OpticalSystem()
 end
 
+# TODO Permit specification of coordinate system?
+# See implementation in projection.jl TODO move?
 function matrix(intrinsics::IntrinsicParameters)
     @unpack focal_length, skewedness, scale_x, scale_y, principal_point = intrinsics
     f = focal_length
@@ -50,6 +52,11 @@ end
 
 Base.@kwdef struct RadialDistortionModel{T <: AbstractVector} <: AbstractDistortionModel
     coefficients::T = SVector{2, Float64}(0.0, 0.0)
+end
+
+function coefficients(model::RadialDistortionModel)
+    @unpack coefficients = model
+    return coefficients
 end
 
 Base.@kwdef struct  Pinhole{T₁ <: AbstractIntrinsicParameters, T₂ <: AbstractExtrinsicParameters} <: AbstractCameraModel

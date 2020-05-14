@@ -7,7 +7,7 @@ function matrix(entity::Projection)
 end
 
 Projection(camera::AbstractCamera) = Projection(construct_projection(camera, CartesianSystem(Point(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(0.0, 0.0, 1.0))))
-
+Projection(camera::AbstractCamera, world_coordinate_system::AbstractCoordinateSystem) = Projection(construct_projection(camera, world_coordinate_system))
 function project(P::Projection, 𝒳::Vector{<: AbstractVector})
     𝐏 = matrix(P)
     ℳ = map(𝒳) do 𝐗
@@ -29,16 +29,17 @@ function back_project(camera::AbstractCamera, ℳ::Vector{<: AbstractVector})
     return ℒ
 end
 
-function construct_projection(camera::AbstractCamera, reference_system::AbstractCoordinateSystem)
+function construct_projection(camera::AbstractCamera, world_reference_system::AbstractCoordinateSystem)
     @unpack model, image_type = camera
     @unpack coordinate_system = image_type
-    construct_projection(model, reference_system, coordinate_system)
+    construct_projection(model, world_reference_system, coordinate_system)
 end
 
-function construct_projection(model::AbstractCameraModel, reference_system::AbstractCoordinateSystem, image_system::AbstractPlanarCoordinateSystem)
+# World reference system is always identity
+function construct_projection(model::AbstractCameraModel, world_reference_system::AbstractCoordinateSystem, image_system::AbstractPlanarCoordinateSystem)
     @unpack intrinsics, extrinsics = model
     𝐊 = matrix(intrinsics, image_system)
-    𝐄 = matrix(extrinsics, reference_system)
+    𝐄 = matrix(extrinsics, world_reference_system)
     𝐏 = 𝐊 * 𝐄
     𝐏 = 𝐏 / norm(𝐏) # TODO optionally remove this normalization
     return 𝐏
@@ -63,8 +64,8 @@ function matrix(intrinsics::IntrinsicParameters, image_system::AbstractPlanarCoo
     return 𝐊′
 end
 
-function matrix(extrinsics::ExtrinsicParameters, reference_system::CartesianSystem = CartesianSystem(Point(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(0.0, 0.0, 1.0)))
-    𝐑, 𝐭 = ascertain_pose(extrinsics, reference_system)
+function matrix(extrinsics::ExtrinsicParameters, world_reference_system::CartesianSystem = CartesianSystem(Point(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(0.0, 0.0, 1.0)))
+    𝐑, 𝐭 = ascertain_pose(extrinsics, world_reference_system)
     𝐄 = [𝐑' -𝐑'*𝐭] # TODO convert to static array
     return 𝐄
 end
