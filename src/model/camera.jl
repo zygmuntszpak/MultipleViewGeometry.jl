@@ -1,7 +1,9 @@
 abstract type AbstractCamera end
 abstract type AbstractCameraModel end
+abstract type AbstractLensCameraModel <: AbstractCameraModel end
 abstract type AbstractIntrinsicParameters end
 abstract type AbstractExtrinsicParameters end
+abstract type AbstractDistortionModel end
 
 
 Base.@kwdef struct IntrinsicParameters <: AbstractIntrinsicParameters
@@ -46,9 +48,19 @@ function basis_vectors(param::ExtrinsicParameters)
     return basis_vectors(coordinate_system)
 end
 
+Base.@kwdef struct RadialDistortionModel{T <: AbstractVector} <: AbstractDistortionModel
+    coefficients::T = SVector{2, Float64}(0.0, 0.0)
+end
+
 Base.@kwdef struct  Pinhole{T₁ <: AbstractIntrinsicParameters, T₂ <: AbstractExtrinsicParameters} <: AbstractCameraModel
     intrinsics::T₁ = IntrinsicParameters()
     extrinsics::T₂ = ExtrinsicParameters()
+end
+
+Base.@kwdef struct  Lens{T₁ <: AbstractIntrinsicParameters, T₂ <: AbstractExtrinsicParameters, T₃ <: AbstractDistortionModel} <: AbstractLensCameraModel
+    intrinsics::T₁ = IntrinsicParameters()
+    extrinsics::T₂ = ExtrinsicParameters()
+    distortion::T₃ = RadialDistortionModel()
 end
 
 function intrinsics(model::AbstractCameraModel)
@@ -59,6 +71,11 @@ end
 function extrinsics(model::AbstractCameraModel)
     @unpack extrinsics = model
     return extrinsics
+end
+
+function distortion(model::AbstractLensCameraModel)
+    @unpack distortion = model
+    return distortion
 end
 
 # TODO add copy constructor
@@ -75,6 +92,11 @@ end
 function intrinsics(camera::AbstractCamera)
     @unpack model = camera
     return intrinsics(model)
+end
+
+function distortion(camera::AbstractCamera)
+    @unpack model = camera
+    return distortion(model)
 end
 
 function model(camera::AbstractCamera)

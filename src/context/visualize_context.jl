@@ -146,6 +146,7 @@ end
 
 function draw_coordinate_system!(scene::AbstractPlotting.Scene, coordinate_system::AbstractCoordinateSystem, scale::Real)
     # TODO Fix the drawing of the coordinate system.
+    @warn "The visualization of the coordinate system is currently incorrect."
     x = Vec3f0(0); baselen = 0.2f0 * scale ; dirlen = 1f0 * scale
     # create an array of differently colored boxes in the direction of the 3 axes
     rectangles = [

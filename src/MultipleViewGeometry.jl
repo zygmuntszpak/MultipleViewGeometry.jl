@@ -66,7 +66,7 @@ include("model/projection.jl")
 include("model/carrier.jl")
 include("model/homography_matrix.jl")
 include("model/fundamental_matrix.jl")
-include("fit/fit_camera_matrix.jl")
+include("fit/fit_sole_camera_rig.jl")
 include("fit/fit_homography.jl")
 include("fit/fit_fundamental_matrix.jl")
 include("view/visualize_properties.jl")
@@ -82,7 +82,10 @@ export IntervalAllotment
 # camera.jl
 export  AbstractCamera,
         AbstractCameraModel,
+        AbstractLensCameraModel,
+        AbstractDistortionModel,
         Pinhole,
+        RadialDistortionModel,
         AbstractIntrinsicParameters,
         AbstractExtrinsicParameters,
         IntrinsicParameters,

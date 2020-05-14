@@ -50,17 +50,20 @@ camera₄ = Camera(image_type = analogue_image₄, model = pinhole₄)
 camera₄ = relocate(camera₄, 𝐑₄, 𝐭₄)
 
 
-# visualize =  VisualizeWorld(; visual_properties = MakieVisualProperties(scale = 150, markersize = 25))
+visualize =  VisualizeWorld(; visual_properties = MakieVisualProperties(scale = 150, markersize = 25))
 cameras = [camera₁, camera₂, camera₃, camera₄]
-# visualize(world, cameras)
-# @unpack scene = visualize
-# display(scene)
+visualize(world, cameras)
+@unpack scene = visualize
+display(scene)
 
 
 calibrate = CalibrateCamera()
-Z = calibrate(world, cameras)
+calibrated_cameras = calibrate(world, cameras)
 
 
+visualize(world, calibrated_cameras)
+@unpack scene = visualize
+display(scene)
 
 # X = Z[3][1:3,1:3]
 # x = Z[3][1:3, 4]

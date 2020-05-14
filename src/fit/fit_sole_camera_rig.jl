@@ -1,5 +1,5 @@
 # TODO take a camera model as input
-function fit_camera_matrix(𝐀::AbstractArray, 𝐤::AbstractVector, ℰ::AbstractVector, 𝒳::AbstractVector, 𝓜::AbstractVector, method::LevenbergMarquardt)
+function fit_sole_camera_rig(𝐀::AbstractArray, 𝐤::AbstractVector, ℰ::AbstractVector, 𝒳::AbstractVector, 𝓜::AbstractVector, method::LevenbergMarquardt)
     task = CameraCalibrationTask()
     # The total number of views.
     M = length(ℰ)
@@ -22,25 +22,26 @@ function fit_camera_matrix(𝐀::AbstractArray, 𝐤::AbstractVector, ℰ::Abstr
 
     method = @set method.seed = ManualEstimation(𝛈) # TODO check/resolve type instability
 
-    # TODO There needs to be an explicit test for the veracity of the Jacobian matrix.
-    𝐉 = jacobian_matrix(𝛈)
-    @unpack vector_valued_objective = objective
-    g = x-> vector_valued_objective(x, observations)
-    z = g(𝛈)
-    𝐉₂ = FiniteDiff.finite_difference_jacobian(g, 𝛈)
-    println("The first")
-    display(𝐉)
-    # println("The second")
-    display(𝐉₂)
-    # println("The end")
-    display(norm(𝐉 - 𝐉₂))
+    # # TODO There needs to be an explicit test for the veracity of the Jacobian matrix.
+    # 𝐉 = jacobian_matrix(𝛈)
+    # @unpack vector_valued_objective = objective
+    # g = x-> vector_valued_objective(x, observations)
+    # z = g(𝛈)
+    # 𝐉₂ = FiniteDiff.finite_difference_jacobian(g, 𝛈)
+    # println("The first")
+    # display(𝐉)
+    # # println("The second")
+    # display(𝐉₂)
+    # # println("The end")
+    # display(norm(𝐉 - 𝐉₂))
 
     𝛈, λ = method(objective, observations, jacobian_matrix) # TODO change order to: observations, objective
     @show λ
+    cameras = compose_camera_structures(𝛈)
     # 𝐇 = reshape(𝛈[1:9],(3,3))
     # 𝐇 = SMatrix{3,3,Float64,9}(𝐇 / norm(𝐇))
     # return HomographyMatrix(𝐇)
-    return nothing
+    return cameras
 end
 
 function (objective::VectorValuedObjective{T})(𝛉::AbstractVector, observations::AbstractObservations) where T <: CameraCalibrationTask
@@ -119,6 +120,72 @@ function (jacobian_functor::JacobianMatrix{T₁, T₂, T₃})(𝛉::AbstractVect
     return jacobian
 end
 
+"""
+   compose_camera_structures(𝛈::AbstractVector)
+
+Given a parameter vector 𝛈 = [𝐢, 𝐤, 𝛚₁, ... ,ωₘ] where 𝐢 represents the
+camera intrinsics, 𝐤 the radial distortion and 𝛚ᵢ = [𝐫ᵢ, 𝐭ᵢ] represents the
+extrinsics for the ith pose of the camera, the function returns a length-M array
+of `Camera` structures which store the intrinsics, extrinsics and distortion
+parameters.
+"""
+function compose_camera_structures(𝛈::AbstractVector)
+    # Determine the total number of views.
+    M = (length(𝛈) - 7) ÷ 6
+    # Camera intrinsic parameters.
+    𝐢 = SVector{5, Float64}(𝛈[1:5]...)
+    # Lens distortion parameters.
+    𝐤 = SVector{2, Float64}(𝛈[6:7]...)
+    # Unpack the intrinsic parameter vector.
+    α, γ, β, uc, vc = 𝐢
+    # Unpack the lens distortion parameters.
+    k₁, k₂ = 𝐤
+    # The intrinsic parameters (α, β, γ) can only be determined up to
+    # an unknown scale factor, i.e., the absolute size of the imaging system
+    # and the focal length f in particular, cannot be determined from
+    # intrinsic parameters alone.
+    # One convention is to set the horizontal scale parameter scale_x to 1
+    # and represent the focal length in terms of horizontal pixel units.
+    # The physical focal length could then be obtained by multipling f
+    # (in pixel units) with the actual horizontal pixel spacing Δx.
+    # The pixel spacing Δx can typically be deduced from information provided
+    # by the camera manufacturer. For example, given a 3 x 2 sensor chip of size
+    # 22.5 x 15 mm with (3000 x 2000) (6 million) square pixels, the
+    # resulting pixel spacing is Δx = Δy = 15mm / 2000 = 0.0075mm.
+    scale_x = 1.0
+    scale_y =   β / α
+    focal_length = α / scale_x
+    skewedness = γ / focal_length
+
+    # TODO include getting image width and height information form the user.
+    intrinsics = IntrinsicParameters(focal_length = focal_length,
+                                     skewedness = skewedness,
+                                     scale_x = scale_x,
+                                     scale_y = scale_y,
+                                     principal_point = Point(uc, vc))
+    radial_distortion = RadialDistortionModel(coefficients = SVector(k₁, k₂))
+    model = Lens(intrinsics = intrinsics, distortion = radial_distortion)
+    image_type = AnalogueImage(coordinate_system = OpticalSystem())
+
+    # Instantiate cameras with the approriate intrinsic parameters but
+    # located at the origin of the coordinate system.
+    cameras = [Camera(image_type = image_type, model = model) for m = 1:M]
+
+    # Keep track of the extrinsics for each view.
+    i = 8
+    for m = 1:M
+        # Extrinsics parameters (modified Rodrigues rotation and translation)
+        𝛚 = SVector{6, Float64}(𝛈[i], 𝛈[i+1], 𝛈[i+2], 𝛈[i+3], 𝛈[i+4], 𝛈[i+5])
+        𝐫 = MRP(𝛚[1], 𝛚[2], 𝛚[3])
+        # Translation vector and rotation matrix.
+        𝐭 = SVector{3, Float64}(𝛚[4], 𝛚[5], 𝛚[6])
+        𝐑 = RotMatrix(𝐫)
+        # Set the pose of the camera.
+        cameras[m] = relocate(cameras[m], inv(𝐑), -inv(𝐑)*𝐭)
+        i = i + 6
+    end
+    return cameras
+end
 
 """
    compose_parameter_vector(𝐀::AbstractArray, 𝛋::AbstractVector, ℰ::AbstractVector)
@@ -134,7 +201,7 @@ function compose_parameter_vector(𝐀::AbstractArray, 𝐤::AbstractVector, ℰ
     vc = 𝐀[2,3]
     k₁ = 𝐤[1]
     k₂ = 𝐤[2]
-    𝐚 = [α, β, γ, uc, vc, k₁,k₂]
+    𝐚 = [α, γ, β, uc, vc, k₁, k₂]
     𝛈 = 𝐚
     M = length(ℰ)
     for m = 1:M

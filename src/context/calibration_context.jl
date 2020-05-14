@@ -32,61 +32,10 @@ function (calibrate::CalibrateCamera)(world::AbstractWorld, cameras::Vector{<:Ab
     # Determine the lens distortion parameters.
     𝐤 = get_lens_distortion(𝐀, ℰ, points, 𝓜)
 
-    @show typeof(𝐤)
     # Refine all estimates by minimising the reprojection error.
-    # 𝛈 = refine_parameters(𝐀, 𝐤, ℰ, points, 𝓜)
+    cameras = fit_sole_camera_rig(𝐀, 𝐤, ℰ, points, 𝓜, LevenbergMarquardt())
 
-    val = distort(𝓜[1][1], 𝐤)
-
-    val2 = radial_deviation(2.0, SVector(1.0,2.0))
-
-    fit_camera_matrix(𝐀, 𝐤, ℰ, points, 𝓜, LevenbergMarquardt())
-
-    #g = x-> radial_deviation(x, SVector(1.0,2.0))
-    # 𝐉₁ = FiniteDiff.finite_difference_derivative(g, 2.0)
-    #𝐉₂ = ∂ₖradial_deviation(2.0, SVector(1.0,2.0))
-
-    #g = x-> distortion(x, SVector(1.0,2.0))
-    #g = x-> distort([2.0, 4.0], x)
-    #P̃(𝐗::AbstractVector, 𝐰::AbstractVector)
-    # result = P̃(SVector(1.0, 2.0, 3.0), SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
-    # @show result
-
-    # 𝛈 = compose_parameter_vector(𝐀, 𝐤, ℰ)
-    # #𝛈[6] = 0
-    # #𝛈[7] = 0
-    # @show project_with_lens(SVector(1.0, 2.0, 3.0), 𝛈[1:13])
-    #
-    # # g = x-> P̃(SVector(1.0, 2.0, 3.0), x)
-    # # 𝐉₁ = FiniteDiff.finite_difference_jacobian(g, SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
-    # # 𝐉₂ = ∂P̃_𝛚(SVector(1.0, 2.0, 3.0), SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
-    #
-    # g = x-> project_with_lens(SVector(1.0, 2.0, 3.0), x)
-    # 𝐉₁ = FiniteDiff.finite_difference_jacobian(g, 𝛈[1:13])
-    # 𝐉₂ = ∂project_with_lens(SVector(1.0, 2.0, 3.0), 𝛈[1:13])
-    #
-    # # g = x-> apply_intrinsics(x, 𝛈[1:13])
-    # # 𝐉₁ = FiniteDiff.finite_difference_jacobian(g, SVector(3.0,2.0))
-    # # 𝐉₂ = ∂𝐀₀_𝐱(SVector(3.0,2.0), 𝛈[1:13])
-    #
-    #
-    #
-    #
-    #
-    # #g = x-> W(x)
-    # #𝐉₁ = FiniteDiff.finite_difference_jacobian(g, SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
-    # #𝐉₂ = ∂𝐰_rt(SVector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
-    # println("start")
-    # display(𝐉₁)
-    # display(𝐉₂)
-    # display(norm(𝐉₁ .- 𝐉₂))
-    # println("end")
-
-
-    #display(𝐀₁)
-    #𝐀₂ = get_camera_intrinsics(ℋ; use_analytical_method = false)
-    #display(𝐀₂)
-    return val2
+    return cameras
 end
 
 """
