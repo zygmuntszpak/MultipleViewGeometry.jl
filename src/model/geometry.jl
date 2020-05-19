@@ -2,7 +2,7 @@ Base.@kwdef struct EuclideanPlane3D <: AbstractPlane
     coordinate_system::CartesianSystem = CartesianSystem()
 end
 
-# TODO include constructor for 
+# TODO include constructor for
 #EuclideanPlane3D(origin::AbstractVector, normal::AbstractVector) = ...
 
 

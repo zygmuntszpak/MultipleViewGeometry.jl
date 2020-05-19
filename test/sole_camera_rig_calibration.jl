@@ -103,7 +103,7 @@ end
 
         ref_basis_vectors = MultipleViewGeometry.basis_vectors(ref_extrinsics)
         calib_basis_vectors  = MultipleViewGeometry.basis_vectors(calib_extrinsics)
-        @show isapprox(matrix(ref_extrinsics)- matrix(calib_extrinsics); atol = 120)
+        @show isapprox(matrix(ref_extrinsics), matrix(calib_extrinsics); atol = 120)
     end
 end
 

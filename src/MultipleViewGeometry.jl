@@ -36,8 +36,6 @@ import ProjectiveNumericalSchemes: SumOfSquares
 
 const ReprojectionError = SumOfSquares
 
-
-
 abstract type ProjectiveEntity end
 abstract type AbstractContext end
 abstract type TwoView <: AbstractContext end
@@ -60,6 +58,7 @@ include("model/coordinate_system.jl")
 include("model/allotment.jl")
 include("model/image.jl")
 include("model/camera.jl")
+include("model/pose.jl")
 include("model/plane.jl")
 include("model/geometry.jl")
 include("model/world.jl")
@@ -67,6 +66,7 @@ include("model/projection.jl")
 include("model/carrier.jl")
 include("model/homography_matrix.jl")
 include("model/fundamental_matrix.jl")
+include("model/essential_matrix.jl")
 include("model/noise.jl")
 include("fit/fit_sole_camera_rig.jl")
 include("fit/fit_homography.jl")
@@ -74,7 +74,10 @@ include("fit/fit_fundamental_matrix.jl")
 include("view/visualize_properties.jl")
 include("context/aquire_context.jl")
 include("context/calibration_context.jl")
+include("context/world_system_transformation_context.jl")
 include("context/visualize_context.jl")
+include("context/triangulate_context.jl")
+include("context/rectification_context.jl")
 
 
 # allotment.jl
@@ -150,6 +153,9 @@ export HomographyMatrix,
 # fundamental_matrix.jl
 export FundamentalMatrix
 
+# essential_matrix.jl
+export EssentialMatrix
+
 # world.jl
 export PrimitiveWorld,
        PlanarWorld
@@ -199,5 +205,20 @@ export CalibrateCamera
 # noise.jl
 export apply_noise
 
+# pose.jl
+export RelativePose,
+       CoordinateTransformation,
+       rotation,
+       translation
+
+# world_system_transformation_context.jl
+export WorldSystemTransformation
+
+# triangulate_context.jl
+export Triangulate,
+       DirectLinearTriangulation
+
+export Rectify,
+       FusielloCalibratedRectification
 
 end # module

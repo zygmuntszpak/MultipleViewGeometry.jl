@@ -7,6 +7,8 @@ Base.@kwdef struct PrimitiveWorld{T₁ <: AbstractCoordinateSystem, T₂ <: Abst
     groups::Vector{T₄} = [IntervalAllotment(1:5000)]
 end
 
+# TODO reconcile the different plane representations and constructions, e.g. Plane, EuclideanPlane3D and PlanarSegment
+
 Base.@kwdef struct PlanarWorld{T₁ <: AbstractCoordinateSystem, T₂ <: AbstractVector, T₃ <: AbstractAllotment, T₄ <:  AbstractPlane} <: AbstractWorld
     coordinate_system::T₁ = CartesianSystem(Point(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(0.0, 0.0, 1.0))
     points::Vector{T₂} = [Point3(rand(-1000.0:1000.0), rand(-1000.0:1000.0), 0.0) for n = 1:5000]
